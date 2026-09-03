@@ -189,6 +189,32 @@ def verify():
         claude_health.error_details or "Ready for headless execution (-p)",
     )
 
+    # Check ollama
+    dummy_ollama_cfg = AgentConfig(type="ollama", name="Ollama")
+    ollama_adapter = AgentRegistry.create("ollama", dummy_ollama_cfg, Path("."))
+    ollama_health = ollama_adapter.health_check()
+
+    table.add_row(
+        "Ollama Local (ollama)",
+        "[green]AVAILABLE[/green]" if ollama_health.is_available else "[yellow]OFFLINE[/yellow]",
+        ollama_health.version or "N/A",
+        ollama_health.binary_path or "N/A",
+        ollama_health.error_details or "Ready for offline local inference",
+    )
+
+    # Check aider
+    dummy_aider_cfg = AgentConfig(type="aider", name="Aider")
+    aider_adapter = AgentRegistry.create("aider", dummy_aider_cfg, Path("."))
+    aider_health = aider_adapter.health_check()
+
+    table.add_row(
+        "Aider CLI (aider)",
+        "[green]AVAILABLE[/green]" if aider_health.is_available else "[dim]NOT INSTALLED[/dim]",
+        aider_health.version or "N/A",
+        aider_health.binary_path or "N/A",
+        aider_health.error_details or "Ready for pair-programming turns",
+    )
+
     # Check git
     from agent_orchestrator.workspace.git_tracker import GitTracker
     git_tracker = GitTracker(Path("."), enabled=True)

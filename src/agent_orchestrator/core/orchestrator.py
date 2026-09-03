@@ -85,7 +85,7 @@ class Orchestrator:
 
         try:
             for turn_idx in range(1, total_turns + 1):
-                # Start of complete interaction (Botta e Risposta)
+                # Start of complete interaction
                 self.event_bus.dispatch(
                     ArenaEvent(
                         event_type=EventType.TURN_START,
@@ -95,16 +95,42 @@ class Orchestrator:
                     )
                 )
 
+                turn_exchange_dialogue: list[str] = []
+
                 for step_idx, (agent_id, agent_cfg) in enumerate(ordered_agents, start=1):
                     adapter = self.adapters[agent_id]
-                    step_label = (
-                        "Thesis" if step_idx == 1
-                        else ("Antithesis" if step_idx == 2 else f"Rebuttal {step_idx}")
-                    )
+                    
+                    # Determine step label
+                    if self.config.mode == "moderated" and len(ordered_agents) >= 3:
+                        if step_idx == 1:
+                            step_label = "Thesis"
+                        elif step_idx == 2:
+                            step_label = "Antithesis"
+                        elif step_idx == 3:
+                            step_label = "Synthesis & Moderation"
+                        else:
+                            step_label = f"Intervention {step_idx}"
+                    else:
+                        step_label = (
+                            "Thesis" if step_idx == 1
+                            else ("Antithesis" if step_idx == 2 else f"Rebuttal {step_idx}")
+                        )
 
                     # Read current workspace state
                     manifesto = self.workspace.read_manifesto()
                     agent_memory = self.workspace.read_memory(agent_id)
+
+                    # Determine opponent dialogue
+                    if self.config.mode == "moderated" and step_idx == 3 and turn_exchange_dialogue:
+                        step_opponent_dialogue = "\n\n---\n\n".join(turn_exchange_dialogue)
+                        step_opponent_name = "Council Participants"
+                        step_opponent_role = "Thesis & Antithesis Proponents"
+                        step_opponent_id = "council"
+                    else:
+                        step_opponent_dialogue = current_input
+                        step_opponent_name = last_agent_name
+                        step_opponent_role = last_agent_role
+                        step_opponent_id = last_agent_id
 
                     context = TurnContext(
                         turn_num=turn_idx,
@@ -115,10 +141,10 @@ class Orchestrator:
                         agent_id=agent_id,
                         agent_name=adapter.name,
                         agent_role=adapter.role,
-                        opponent_id=last_agent_id,
-                        opponent_name=last_agent_name,
-                        opponent_role=last_agent_role,
-                        opponent_dialogue=current_input,
+                        opponent_id=step_opponent_id,
+                        opponent_name=step_opponent_name,
+                        opponent_role=step_opponent_role,
+                        opponent_dialogue=step_opponent_dialogue,
                         topic=self.config.topic,
                         manifesto_content=manifesto,
                         agent_memory=agent_memory,
@@ -233,6 +259,10 @@ class Orchestrator:
                             payload={"result": result},
                         )
                     )
+
+                    # Record this step in the current turn's exchange
+                    if result.dialogue:
+                        turn_exchange_dialogue.append(f"[{adapter.name} ({step_label})]:\n{result.dialogue}")
 
                     # Update context for the next turn
                     current_input = result.dialogue

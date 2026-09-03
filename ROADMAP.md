@@ -28,26 +28,26 @@ flowchart LR
 
 ---
 
-### ⏳ v0.2.0: Agent Ecosystem Expansion (In Progress)
+### ✅ v0.2.0: Agent Ecosystem Expansion (Completed)
 *Objective: Expand beyond `claude` and `agy` to support the broader ecosystem of coding CLIs and local open-weight models.*
 
-- [ ] **Aider CLI Adapter (`aider`):**
+- [x] **Aider CLI Adapter (`aider`):**
   - Native integration with [Aider](https://aider.chat/) in headless print mode (`--message`, `--no-auto-commits`).
   - Allows pairing Claude/Antigravity with open-source models via Aider.
-- [ ] **Local Model Adapter via Ollama (`ollama`):**
+- [x] **Local Model Adapter via Ollama (`ollama`):**
   - Direct HTTP API communication with local Ollama instances (`http://localhost:11434`).
   - Zero-token, 100% private offline debates using models like DeepSeek-R1, Llama 3.3, and Qwen 2.5 Coder.
-- [ ] **Direct Cloud API Fallbacks (`api`):**
-  - Optional fallback adapters using official SDKs (`google-genai`, `anthropic`, `openai`) for users who do not have CLI binaries installed locally.
-- [ ] **Dynamic Adapter Discovery:**
-  - Auto-detection of available CLI tools on system PATH during initialization.
+- [x] **Direct Cloud API Fallbacks (`api` / `litellm`):**
+  - Fallback adapters using LiteLLM/OpenAI SDKs for cloud inference without local CLI tools.
+- [x] **Dynamic Adapter Discovery:**
+  - Auto-detection and health checking of CLI tools and Ollama services in `run.py verify`.
 
 ---
 
-### 📅 v0.3.0: Advanced Dialectic Topologies & Moderated Councils (Planned)
+### ⏳ v0.3.0: Advanced Dialectic Topologies & Moderated Councils (In Progress)
 *Objective: Move beyond binary ping-pong into multi-agent governance and anti-sycophancy steering.*
 
-- [ ] **The Moderated Council (`mode: "moderated"`):**
+- [x] **The Moderated Council (`mode: "moderated"`):**
   - Three-agent setup: **Agent 1 (Thesis)** vs. **Agent 2 (Antithesis)** + **Agent 3 (Moderator / Synthesizer)**.
   - The Moderator audits the exchange after each turn, detects logical fallacies, injects destabilizing paradoxes if consensus is reached too easily, and drafts formal synthesis sections.
 - [ ] **Dynamic Persona Mutation (Self-Modifying Prompts):**

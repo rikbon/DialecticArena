@@ -1,0 +1,34 @@
+# Local Open-Weight Models Dialectic (Zero-Token / 100% Private)
+topic: "Can computational consciousness functionally equate to phenomenal qualia, or is subjectivity non-computable?"
+turns: 3
+mode: "ping_pong"
+
+workspace:
+  dir_path: "workspace_ollama"
+  manifesto_filename: "arena_manifesto.md"
+  memory_prefix: "memory"
+  git_track: true
+  autonomous_tools: false
+
+agents:
+  local_alfa:
+    type: "ollama"
+    name: "Gemma Local (Alfa)"
+    role: "Analytical Functionalism & Physicalist Epistemology"
+    color: "bright_magenta"
+    model: "gemma4:31b-cloud"
+    persona_file: "prompts/claude_alfa.txt"
+    timeout_seconds: 180
+
+  antigravity:
+    type: "agy"
+    name: "Antigravity (Beta)"
+    role: "Emergent Complex Systems & Phenomenological Holism"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_beta.txt"
+    effort: "high"
+    timeout_seconds: 240
+
+agent_order:
+  - "local_alfa"
+  - "antigravity"

@@ -47,3 +47,32 @@ def test_orchestrator_full_loop(mock_arena_config: ArenaConfig):
 
     mem_a = orchestrator.workspace.read_memory("agent_a")
     assert "Reflection" in mem_a
+
+
+def test_orchestrator_moderated_mode(tmp_path):
+    from agent_orchestrator.config import AgentConfig, WorkspaceConfig
+
+    cfg = ArenaConfig(
+        topic="Is mathematics invented or discovered?",
+        turns=1,
+        mode="moderated",
+        workspace=WorkspaceConfig(dir_path=str(tmp_path / "council_ws"), git_track=False),
+        agents={
+            "proponent": AgentConfig(type="mock", name="Proponent", role="Platonist"),
+            "opponent": AgentConfig(type="mock", name="Opponent", role="Constructivist"),
+            "moderator": AgentConfig(type="mock", name="Arbiter", role="Dialectic Arbiter"),
+        },
+        agent_order=["proponent", "opponent", "moderator"],
+    )
+
+    orchestrator = Orchestrator(config=cfg)
+    orchestrator.initialize()
+    results = orchestrator.run()
+
+    # 1 turn with 3 agents = 3 steps
+    assert len(results) == 3
+    assert results[0].step_label == "Thesis"
+    assert results[1].step_label == "Antithesis"
+    assert results[2].step_label == "Synthesis & Moderation"
+    for r in results:
+        assert r.is_success is True

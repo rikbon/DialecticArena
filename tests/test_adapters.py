@@ -68,3 +68,27 @@ def test_claude_adapter_health_check(tmp_path: Path):
     health = adapter.health_check()
     assert health.is_available is True
     assert health.version is not None
+
+
+def test_ollama_adapter_registration(tmp_path: Path):
+    assert "ollama" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="ollama", name="Local Ollama")
+    adapter = AgentRegistry.create("ollama_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)
+
+
+def test_aider_adapter_registration(tmp_path: Path):
+    assert "aider" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="aider", name="Aider")
+    adapter = AgentRegistry.create("aider_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)
+
+
+def test_api_adapter_registration(tmp_path: Path):
+    assert "api" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="api", name="Direct API", model="gpt-4o")
+    adapter = AgentRegistry.create("api_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)
