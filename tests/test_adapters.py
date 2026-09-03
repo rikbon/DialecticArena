@@ -29,8 +29,10 @@ def test_mock_adapter_execution(tmp_path: Path):
     assert adapter.health_check().is_available is True
 
     context = TurnContext(
-        round_num=1,
         turn_num=1,
+        step_num=1,
+        step_label="Botta",
+        total_turns=3,
         agent_id="mock_alfa",
         agent_name="Mock Alfa",
         agent_role="Analytic",

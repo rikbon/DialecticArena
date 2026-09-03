@@ -46,12 +46,12 @@ def test_workspace_updates(tmp_path: Path):
     manager.initialize("Test Topic", agents)
 
     # Update manifesto
-    manager.update_manifesto("Agent 1", round_num=1, contribution="Proposition: Truth is invariant.")
+    manager.update_manifesto("Agent 1", turn_num=1, step_label="Botta", contribution="Proposition: Truth is invariant.")
     updated_manifesto = manager.read_manifesto()
     assert "Proposition: Truth is invariant." in updated_manifesto
 
     # Update memory
-    manager.append_memory("agent_1", "Agent 1", round_num=1, evolution="Shifted paradigm.")
+    manager.append_memory("agent_1", "Agent 1", turn_num=1, step_label="Botta", evolution="Shifted paradigm.")
     updated_memory = manager.read_memory("agent_1")
     assert "Shifted paradigm." in updated_memory
 
@@ -64,5 +64,5 @@ def test_workspace_updates(tmp_path: Path):
         ontology_contribution="ontology",
         internal_evolution="evolution",
     )
-    snap_path = manager.save_round_snapshot(1, 1, "agent_1", res)
+    snap_path = manager.save_turn_snapshot(1, 1, "Botta", "agent_1", res)
     assert snap_path.exists()

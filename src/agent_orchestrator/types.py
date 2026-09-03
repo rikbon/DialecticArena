@@ -11,10 +11,12 @@ from typing import Any, Optional
 class EventType(str, Enum):
     ARENA_START = "arena_start"
     ARENA_COMPLETE = "arena_complete"
-    ROUND_START = "round_start"
-    ROUND_COMPLETE = "round_complete"
-    TURN_START = "turn_start"
-    TURN_COMPLETE = "turn_complete"
+    TURN_START = "turn_start"          # Start of a complete Botta e Risposta interaction
+    TURN_COMPLETE = "turn_complete"    # End of a complete Botta e Risposta interaction
+    STEP_START = "step_start"          # Individual agent speaking (Botta or Risposta)
+    STEP_COMPLETE = "step_complete"    # Individual agent completed response
+    ROUND_START = "turn_start"         # Compatibility alias
+    ROUND_COMPLETE = "turn_complete"   # Compatibility alias
     MANIFESTO_UPDATED = "manifesto_updated"
     MEMORY_UPDATED = "memory_updated"
     GIT_COMMITTED = "git_committed"
@@ -25,8 +27,10 @@ class EventType(str, Enum):
 class ArenaEvent:
     event_type: EventType
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    round_num: int = 0
-    turn_num: int = 0
+    turn_num: int = 0                  # 1, 2, 3 (Interaction number)
+    step_num: int = 0                  # 1 (Botta), 2 (Risposta), etc.
+    step_label: str = ""               # "Botta", "Risposta", "Replica"
+    round_num: int = 0                 # Alias for turn_num
     agent_id: Optional[str] = None
     agent_name: Optional[str] = None
     payload: dict[str, Any] = field(default_factory=dict)
@@ -42,8 +46,10 @@ class HealthCheckResult:
 
 @dataclass
 class TurnContext:
-    round_num: int
-    turn_num: int
+    turn_num: int                      # Interaction index (1, 2, 3...)
+    step_num: int                      # 1 = Botta, 2 = Risposta
+    step_label: str                    # "Botta" or "Risposta"
+    total_turns: int                   # Total interactions planned
     agent_id: str
     agent_name: str
     agent_role: str
@@ -55,6 +61,7 @@ class TurnContext:
     manifesto_content: str
     agent_memory: str
     history_summary: str = ""
+    round_num: int = 0                 # Alias for turn_num
 
 
 @dataclass
@@ -65,6 +72,9 @@ class TurnResult:
     dialogue: str
     ontology_contribution: str
     internal_evolution: str
+    turn_num: int = 0
+    step_num: int = 0
+    step_label: str = ""
     execution_time_seconds: float = 0.0
     exit_code: int = 0
     error_message: Optional[str] = None

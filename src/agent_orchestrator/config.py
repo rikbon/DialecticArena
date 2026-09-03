@@ -50,12 +50,21 @@ class ArenaConfig(BaseModel):
         default="Is the universe purely mathematical structure, or does phenomenal consciousness represent an irreducible ontological primitive?",
         description="The core topic or controversy of the debate",
     )
-    rounds: int = Field(default=3, ge=1, le=50, description="Number of complete interaction rounds")
+    turns: int = Field(default=3, ge=1, le=50, description="Number of complete interactions ('botte e risposte')")
+    rounds: Optional[int] = Field(default=None, description="Compatibility alias for turns")
     mode: str = Field(default="ping_pong", description="Debate mode: ping_pong, round_robin, moderated")
     agents: dict[str, AgentConfig] = Field(default_factory=dict, description="Configured agents by ID")
     agent_order: list[str] = Field(default_factory=list, description="Ordered list of agent IDs for turns")
     workspace: WorkspaceConfig = Field(default_factory=WorkspaceConfig)
     max_history_turns: int = Field(default=6, description="Recent conversation turns included in prompt")
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.rounds is not None and self.turns == 3:
+            self.turns = self.rounds
+
+    @property
+    def total_turns(self) -> int:
+        return self.turns
 
     def get_ordered_agents(self) -> list[tuple[str, AgentConfig]]:
         """Return list of (agent_id, AgentConfig) in execution order."""

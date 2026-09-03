@@ -30,7 +30,7 @@ console = Console()
 
 def create_default_config(
     topic: Optional[str] = None,
-    rounds: int = 3,
+    turns: int = 3,
     mock: bool = False,
     effort: Optional[str] = None,
     git_track: bool = True,
@@ -79,7 +79,7 @@ def create_default_config(
 
     return ArenaConfig(
         topic=topic_str,
-        rounds=rounds,
+        turns=turns,
         mode="ping_pong",
         agents=agents,
         agent_order=["claude", "antigravity"],
@@ -98,10 +98,13 @@ def run(
         None, "--config", "-c", help="Path to a YAML configuration file"
     ),
     topic: Optional[str] = typer.Option(
-        None, "--topic", "-t", help="Initial debate seed or philosophical proposition"
+        None, "--topic", help="Initial debate seed or philosophical proposition"
     ),
-    rounds: int = typer.Option(
-        3, "--rounds", "-r", min=1, max=50, help="Number of debate cycles/rounds"
+    turns: int = typer.Option(
+        3, "--turns", "-t", min=1, max=50, help="Number of interactions ('botte e risposte')"
+    ),
+    rounds: Optional[int] = typer.Option(
+        None, "--rounds", "-r", help="Alias for --turns (botte e risposte)"
     ),
     mock: bool = typer.Option(
         False, "--mock", help="Use simulated mock agents (no token costs, fast offline test)"
@@ -116,21 +119,23 @@ def run(
         "workspace", "--workspace", "-w", help="Workspace directory for shared files"
     ),
 ):
-    """Launch an autonomous debate session between CLI agents."""
+    """Launch an autonomous debate session between CLI agents (each turn is a 'botta e risposta')."""
+    actual_turns = rounds if rounds is not None else turns
+
     if config_file and config_file.exists():
         console.print(f"[dim]Loading configuration from {config_file}...[/dim]")
         cfg = load_config(config_file)
         if topic:
             cfg.topic = topic
-        if rounds:
-            cfg.rounds = rounds
+        if actual_turns:
+            cfg.turns = actual_turns
         if mock:
             for a in cfg.agents.values():
                 a.type = "mock"
     else:
         cfg = create_default_config(
             topic=topic,
-            rounds=rounds,
+            turns=actual_turns,
             mock=mock,
             effort=effort,
             git_track=git,

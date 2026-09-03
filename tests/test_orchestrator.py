@@ -34,10 +34,10 @@ def test_orchestrator_full_loop(mock_arena_config: ArenaConfig):
     # Verify events
     event_types = [ev.event_type for ev in events_received]
     assert EventType.ARENA_START in event_types
-    assert EventType.ROUND_START in event_types
     assert EventType.TURN_START in event_types
+    assert EventType.STEP_START in event_types
+    assert EventType.STEP_COMPLETE in event_types
     assert EventType.TURN_COMPLETE in event_types
-    assert EventType.ROUND_COMPLETE in event_types
     assert EventType.ARENA_COMPLETE in event_types
 
     # Verify files created and populated

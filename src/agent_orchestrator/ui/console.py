@@ -28,10 +28,12 @@ class RichConsoleReporter:
         """Handle incoming arena event."""
         if event.event_type == EventType.ARENA_START:
             self._on_arena_start(event)
-        elif event.event_type == EventType.ROUND_START:
-            self._on_round_start(event)
         elif event.event_type == EventType.TURN_START:
             self._on_turn_start(event)
+        elif event.event_type == EventType.STEP_START:
+            self._on_step_start(event)
+        elif event.event_type == EventType.STEP_COMPLETE:
+            self._on_step_complete(event)
         elif event.event_type == EventType.TURN_COMPLETE:
             self._on_turn_complete(event)
         elif event.event_type == EventType.GIT_COMMITTED:
@@ -43,7 +45,7 @@ class RichConsoleReporter:
 
     def _on_arena_start(self, event: ArenaEvent) -> None:
         topic = event.payload.get("topic", "")
-        rounds = event.payload.get("rounds", 0)
+        total_turns = event.payload.get("total_turns", event.payload.get("rounds", 0))
         agents = event.payload.get("agents", {})
 
         agent_badges = "  ".join([f"[bold]{name}[/bold] (`{aid}`)" for aid, name in agents.items()])
@@ -52,7 +54,7 @@ class RichConsoleReporter:
         content = (
             f"[bold cyan]Seed Topic:[/bold cyan]\n"
             f"[italic white]{topic}[/italic white]\n\n"
-            f"[bold green]Rounds:[/bold green] {rounds}  |  "
+            f"[bold green]Interactions (Turns):[/bold green] {total_turns} (Botte e Risposte)  |  "
             f"[bold green]Participants:[/bold green] {agent_badges}"
         )
 
@@ -60,17 +62,18 @@ class RichConsoleReporter:
         self.console.print(Panel(content, title=title_text, border_style="bright_blue", padding=(1, 2)))
         self.console.print()
 
-    def _on_round_start(self, event: ArenaEvent) -> None:
-        r = event.round_num
-        total = event.payload.get("total_rounds", 0)
-        self.console.print(Rule(f"[bold yellow]ROUND {r} of {total}[/bold yellow]", style="yellow"))
+    def _on_turn_start(self, event: ArenaEvent) -> None:
+        t = event.turn_num
+        total = event.payload.get("total_turns", 0)
+        self.console.print(Rule(f"[bold yellow]TURN {t} of {total} [Interazione: Botta e Risposta][/bold yellow]", style="yellow"))
         self.console.print()
 
-    def _on_turn_start(self, event: ArenaEvent) -> None:
+    def _on_step_start(self, event: ArenaEvent) -> None:
         agent_name = event.agent_name or "Agent"
-        self.console.print(f"[bold dim]>> [Agent '{agent_name}'] synthesizing response...[/bold dim]")
+        label = event.step_label or "Mossa"
+        self.console.print(f"[bold dim]>> [Turno {event.turn_num}.{event.step_num} | {label}] '{agent_name}' elabora la replica...[/bold dim]")
 
-    def _on_turn_complete(self, event: ArenaEvent) -> None:
+    def _on_step_complete(self, event: ArenaEvent) -> None:
         res: Optional[TurnResult] = event.payload.get("result")
         if not res:
             return
@@ -84,7 +87,7 @@ class RichConsoleReporter:
         # Build turn panel content
         body_parts = []
         if res.dialogue:
-            body_parts.append(f"[bold]Argument:[/bold]\n{res.dialogue}")
+            body_parts.append(f"[bold]Argument ({res.step_label}):[/bold]\n{res.dialogue}")
 
         if res.ontology_contribution:
             body_parts.append(
@@ -102,7 +105,8 @@ class RichConsoleReporter:
             body_parts.append(f"[bold red]Execution Error:[/bold red] {res.error_message}")
 
         content = "\n\n".join(body_parts)
-        title = f"[bold {color}]Turn {event.turn_num} | {res.agent_name}[/bold {color}] ({res.execution_time_seconds:.1f}s)"
+        label_str = f"[{res.step_label}] " if res.step_label else ""
+        title = f"[bold {color}]Turn {res.turn_num}.{res.step_num} | {label_str}{res.agent_name}[/bold {color}] ({res.execution_time_seconds:.1f}s)"
 
         self.console.print(
             Panel(
@@ -114,19 +118,24 @@ class RichConsoleReporter:
         )
         self.console.print()
 
+    def _on_turn_complete(self, event: ArenaEvent) -> None:
+        pass
+
     def _on_git_committed(self, event: ArenaEvent) -> None:
         commit = event.payload.get("commit_hash", "")
         self.console.print(f"  [dim green]✔ Workspace state committed to Git (`{commit}`)[/dim green]\n")
 
     def _on_arena_complete(self, event: ArenaEvent) -> None:
         manifesto_path = event.payload.get("manifesto_path", "")
-        turns = event.payload.get("total_turns", 0)
+        total_turns = event.payload.get("total_turns", 0)
+        total_steps = event.payload.get("total_steps", 0)
 
         table = Table(title="Arena Session Summary", border_style="bright_green")
         table.add_column("Metric", style="cyan", justify="right")
         table.add_column("Value", style="white")
 
-        table.add_row("Total Turns Completed", str(turns))
+        table.add_row("Interactions (Turns - Botte e Risposte)", str(total_turns))
+        table.add_row("Total Agent Responses Generated", str(total_steps))
         table.add_row("Shared Manifesto Document", manifesto_path)
         table.add_row("Status", "[bold green]Completed Successfully[/bold green]")
 

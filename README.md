@@ -91,21 +91,21 @@ Expected output:
 ```
 
 ### 2. Run an Offline Mock Simulation (Free & Instant)
-Test the entire orchestration loop and inspect the generated files:
+Test the entire orchestration loop and inspect the generated files. Each turn is a complete interaction ("botta e risposta"):
 ```bash
-python3 run.py run --mock --rounds 3
+python3 run.py run --mock --turns 3
 ```
 
 ### 3. Run a Live Debate (Claude Code vs Google Antigravity)
-Launch a live 3-round dispute on the nature of reality and mind:
+Launch a live 3-turn dispute (3 complete "botta e risposta" interactions = 6 responses) on the nature of reality and mind:
 ```bash
-python3 run.py run --rounds 3 --effort high
+python3 run.py run --turns 3 --effort high
 ```
 
 Or pass a custom topic directly:
 ```bash
 python3 run.py run \
-  --rounds 3 \
+  --turns 3 \
   --topic "Can deterministic computational automata produce non-epiphenomenal subjective consciousness?"
 ```
 

@@ -22,7 +22,7 @@ def test_cli_run_mock_dry_run(tmp_path):
         [
             "run",
             "--mock",
-            "--rounds", "1",
+            "--turns", "1",
             "--workspace", str(ws_dir),
             "--no-git",
         ],
@@ -32,3 +32,19 @@ def test_cli_run_mock_dry_run(tmp_path):
     assert (ws_dir / "arena_manifesto.md").exists()
     assert (ws_dir / "memory_claude.md").exists()
     assert (ws_dir / "memory_antigravity.md").exists()
+
+
+def test_cli_run_rounds_alias(tmp_path):
+    ws_dir = tmp_path / "mock_test_rounds"
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--mock",
+            "-r", "1",
+            "--workspace", str(ws_dir),
+            "--no-git",
+        ],
+    )
+    assert result.exit_code == 0
+    assert (ws_dir / "arena_manifesto.md").exists()

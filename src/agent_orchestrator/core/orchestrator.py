@@ -64,7 +64,7 @@ class Orchestrator:
             raise ValueError("At least two agents are required to run an arena debate.")
 
         all_results: list[TurnResult] = []
-        turn_counter = 0
+        total_turns = self.config.total_turns
 
         # Emit ARENA_START
         self.event_bus.dispatch(
@@ -72,7 +72,7 @@ class Orchestrator:
                 event_type=EventType.ARENA_START,
                 payload={
                     "topic": self.config.topic,
-                    "rounds": self.config.rounds,
+                    "total_turns": total_turns,
                     "agents": {aid: acfg.name for aid, acfg in ordered_agents},
                 },
             )
@@ -84,26 +84,34 @@ class Orchestrator:
         last_agent_role = ordered_agents[-1][1].role
 
         try:
-            for r in range(1, self.config.rounds + 1):
+            for turn_idx in range(1, total_turns + 1):
+                # Start of complete interaction (Botta e Risposta)
                 self.event_bus.dispatch(
                     ArenaEvent(
-                        event_type=EventType.ROUND_START,
-                        round_num=r,
-                        payload={"round": r, "total_rounds": self.config.rounds},
+                        event_type=EventType.TURN_START,
+                        turn_num=turn_idx,
+                        round_num=turn_idx,
+                        payload={"turn": turn_idx, "total_turns": total_turns},
                     )
                 )
 
-                for agent_id, agent_cfg in ordered_agents:
-                    turn_counter += 1
+                for step_idx, (agent_id, agent_cfg) in enumerate(ordered_agents, start=1):
                     adapter = self.adapters[agent_id]
+                    step_label = (
+                        "Botta" if step_idx == 1
+                        else ("Risposta" if step_idx == 2 else f"Replica {step_idx}")
+                    )
 
                     # Read current workspace state
                     manifesto = self.workspace.read_manifesto()
                     agent_memory = self.workspace.read_memory(agent_id)
 
                     context = TurnContext(
-                        round_num=r,
-                        turn_num=turn_counter,
+                        turn_num=turn_idx,
+                        step_num=step_idx,
+                        step_label=step_label,
+                        total_turns=total_turns,
+                        round_num=turn_idx,
                         agent_id=agent_id,
                         agent_name=adapter.name,
                         agent_role=adapter.role,
@@ -116,12 +124,14 @@ class Orchestrator:
                         agent_memory=agent_memory,
                     )
 
-                    # Notify turn start
+                    # Notify step start
                     self.event_bus.dispatch(
                         ArenaEvent(
-                            event_type=EventType.TURN_START,
-                            round_num=r,
-                            turn_num=turn_counter,
+                            event_type=EventType.STEP_START,
+                            turn_num=turn_idx,
+                            step_num=step_idx,
+                            step_label=step_label,
+                            round_num=turn_idx,
                             agent_id=agent_id,
                             agent_name=adapter.name,
                             payload={"context": context},
@@ -130,6 +140,9 @@ class Orchestrator:
 
                     # Execute turn
                     result = adapter.execute_turn(context)
+                    result.turn_num = turn_idx
+                    result.step_num = step_idx
+                    result.step_label = step_label
                     all_results.append(result)
 
                     # Handle turn updates
@@ -138,14 +151,17 @@ class Orchestrator:
                         if result.ontology_contribution:
                             self.workspace.update_manifesto(
                                 agent_name=adapter.name,
-                                round_num=r,
+                                turn_num=turn_idx,
+                                step_label=step_label,
                                 contribution=result.ontology_contribution,
                             )
                             self.event_bus.dispatch(
                                 ArenaEvent(
                                     event_type=EventType.MANIFESTO_UPDATED,
-                                    round_num=r,
-                                    turn_num=turn_counter,
+                                    turn_num=turn_idx,
+                                    step_num=step_idx,
+                                    step_label=step_label,
+                                    round_num=turn_idx,
                                     agent_id=agent_id,
                                     agent_name=adapter.name,
                                     payload={"contribution": result.ontology_contribution},
@@ -157,24 +173,28 @@ class Orchestrator:
                             self.workspace.append_memory(
                                 agent_id=agent_id,
                                 agent_name=adapter.name,
-                                round_num=r,
+                                turn_num=turn_idx,
+                                step_label=step_label,
                                 evolution=result.internal_evolution,
                             )
                             self.event_bus.dispatch(
                                 ArenaEvent(
                                     event_type=EventType.MEMORY_UPDATED,
-                                    round_num=r,
-                                    turn_num=turn_counter,
+                                    turn_num=turn_idx,
+                                    step_num=step_idx,
+                                    step_label=step_label,
+                                    round_num=turn_idx,
                                     agent_id=agent_id,
                                     agent_name=adapter.name,
                                     payload={"evolution": result.internal_evolution},
                                 )
                             )
 
-                        # 3. Save JSON turn snapshot
-                        self.workspace.save_round_snapshot(
-                            round_num=r,
-                            turn_num=turn_counter,
+                        # 3. Save snapshot
+                        self.workspace.save_turn_snapshot(
+                            turn_num=turn_idx,
+                            step_num=step_idx,
+                            step_label=step_label,
                             agent_id=agent_id,
                             result=result,
                         )
@@ -182,28 +202,32 @@ class Orchestrator:
                         # 4. Optional git commit
                         commit_hash = self.workspace.commit_turn(
                             agent_name=adapter.name,
-                            round_num=r,
-                            turn_num=turn_counter,
+                            turn_num=turn_idx,
+                            step_label=step_label,
                             summary=result.dialogue[:60],
                         )
                         if commit_hash:
                             self.event_bus.dispatch(
                                 ArenaEvent(
                                     event_type=EventType.GIT_COMMITTED,
-                                    round_num=r,
-                                    turn_num=turn_counter,
+                                    turn_num=turn_idx,
+                                    step_num=step_idx,
+                                    step_label=step_label,
+                                    round_num=turn_idx,
                                     agent_id=agent_id,
                                     agent_name=adapter.name,
                                     payload={"commit_hash": commit_hash},
                                 )
                             )
 
-                    # Notify turn completion
+                    # Notify step completion
                     self.event_bus.dispatch(
                         ArenaEvent(
-                            event_type=EventType.TURN_COMPLETE,
-                            round_num=r,
-                            turn_num=turn_counter,
+                            event_type=EventType.STEP_COMPLETE,
+                            turn_num=turn_idx,
+                            step_num=step_idx,
+                            step_label=step_label,
+                            round_num=turn_idx,
                             agent_id=agent_id,
                             agent_name=adapter.name,
                             payload={"result": result},
@@ -216,11 +240,13 @@ class Orchestrator:
                     last_agent_name = adapter.name
                     last_agent_role = adapter.role
 
+                # Completed full interaction
                 self.event_bus.dispatch(
                     ArenaEvent(
-                        event_type=EventType.ROUND_COMPLETE,
-                        round_num=r,
-                        payload={"round": r},
+                        event_type=EventType.TURN_COMPLETE,
+                        turn_num=turn_idx,
+                        round_num=turn_idx,
+                        payload={"turn": turn_idx},
                     )
                 )
 
@@ -237,7 +263,8 @@ class Orchestrator:
             ArenaEvent(
                 event_type=EventType.ARENA_COMPLETE,
                 payload={
-                    "total_turns": len(all_results),
+                    "total_turns": total_turns,
+                    "total_steps": len(all_results),
                     "manifesto_path": str(self.workspace.manifesto_path),
                 },
             )
