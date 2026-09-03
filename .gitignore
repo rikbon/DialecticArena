@@ -47,6 +47,6 @@ tmp/
 .cache/
 
 # Arena Workspace runtime data
-workspace/
-workspace_*/
+/workspace/
+/workspace_*/
 *.tmp

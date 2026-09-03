@@ -17,6 +17,7 @@ from agent_orchestrator.types import (
     TurnResult,
 )
 from agent_orchestrator.workspace.manager import WorkspaceManager
+from agent_orchestrator.workspace.convergence import ConvergenceAnalyzer, ConvergenceReport
 
 
 class Orchestrator:
@@ -216,6 +217,27 @@ class Orchestrator:
                                 )
                             )
 
+                            # 2b. Dynamic persona mutation (Self-Modifying Prompts)
+                            if self.config.mutate_personas:
+                                updated_persona = self.workspace.mutate_persona(
+                                    agent_id=agent_id,
+                                    evolution_text=result.internal_evolution,
+                                    turn_num=turn_idx,
+                                )
+                                adapter.update_persona(updated_persona)
+                                self.event_bus.dispatch(
+                                    ArenaEvent(
+                                        event_type=EventType.PERSONA_MUTATED,
+                                        turn_num=turn_idx,
+                                        step_num=step_idx,
+                                        step_label=step_label,
+                                        round_num=turn_idx,
+                                        agent_id=agent_id,
+                                        agent_name=adapter.name,
+                                        payload={"agent_id": agent_id, "updated_persona": updated_persona},
+                                    )
+                                )
+
                         # 3. Save snapshot
                         self.workspace.save_turn_snapshot(
                             turn_num=turn_idx,
@@ -270,13 +292,30 @@ class Orchestrator:
                     last_agent_name = adapter.name
                     last_agent_role = adapter.role
 
+                # Evaluate dialectic convergence across turns
+                turn_convergence = None
+                if self.config.convergence_tracking:
+                    manifesto_text = self.workspace.read_manifesto()
+                    dialogue_history = [r.dialogue for r in all_results if r.dialogue]
+                    turn_convergence = ConvergenceAnalyzer.analyze(manifesto_text, dialogue_history)
+                    convergence_md = ConvergenceAnalyzer.generate_markdown_section(turn_convergence)
+                    self.workspace.update_manifesto_convergence(convergence_md)
+                    self.event_bus.dispatch(
+                        ArenaEvent(
+                            event_type=EventType.CONVERGENCE_EVALUATED,
+                            turn_num=turn_idx,
+                            round_num=turn_idx,
+                            payload={"report": turn_convergence},
+                        )
+                    )
+
                 # Completed full interaction
                 self.event_bus.dispatch(
                     ArenaEvent(
                         event_type=EventType.TURN_COMPLETE,
                         turn_num=turn_idx,
                         round_num=turn_idx,
-                        payload={"turn": turn_idx},
+                        payload={"turn": turn_idx, "convergence": turn_convergence},
                     )
                 )
 
@@ -288,6 +327,13 @@ class Orchestrator:
                 )
             )
 
+        # Final convergence summary
+        final_convergence = None
+        if self.config.convergence_tracking:
+            manifesto_text = self.workspace.read_manifesto()
+            dialogue_history = [r.dialogue for r in all_results if r.dialogue]
+            final_convergence = ConvergenceAnalyzer.analyze(manifesto_text, dialogue_history)
+
         # Emit ARENA_COMPLETE
         self.event_bus.dispatch(
             ArenaEvent(
@@ -296,6 +342,7 @@ class Orchestrator:
                     "total_turns": total_turns,
                     "total_steps": len(all_results),
                     "manifesto_path": str(self.workspace.manifesto_path),
+                    "final_convergence": final_convergence,
                 },
             )
         )

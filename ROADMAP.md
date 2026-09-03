@@ -5,7 +5,7 @@ This document outlines the architectural vision, release milestones, and develop
 ```mermaid
 flowchart LR
     M1["v0.1.0\nCore Fundamentals\n[Released]"] --> M2["v0.2.0\nAgent Ecosystem\n[Released]"]
-    M2 --> M3["v0.3.0\nModerated Topologies\n[In Progress]"]
+    M2 --> M3["v0.3.0\nModerated Topologies\n[Released]"]
     M3 --> M4["v0.4.0\nAutonomous Code Arena\n[Planned]"]
     M4 --> M5["v0.5.0\nWeb Spectator UI\n[Planned]"]
     M5 --> M6["v1.0.0\nGitHub Automation & Mesh\n[Long-Term]"]
@@ -50,17 +50,18 @@ flowchart LR
 
 ---
 
-### Version 0.3.0: Advanced Dialectic Topologies & Moderated Councils (In Progress)
+### Version 0.3.0: Advanced Dialectic Topologies & Moderated Councils (Released)
 *Objective: Move beyond binary ping-pong into multi-agent governance and anti-sycophancy steering.*
 
 - [x] **The Moderated Council (`mode: "moderated"`):**
   - Three-agent setup: Agent 1 (Thesis), Agent 2 (Antithesis), and Agent 3 (Moderator / Synthesizer).
   - The Moderator audits the exchange after each turn, detects logical fallacies, injects destabilizing paradoxes if consensus is reached prematurely, and drafts formal synthesis sections.
-- [ ] **Dynamic Persona Mutation (Self-Modifying Prompts):**
-  - Allow agents to append lessons, concessions, and tactical shifts directly back into their persona prompt files on disk.
-- [ ] **Ontology Proposition Graph & Convergence Scoring:**
-  - Automated classification of manifesto propositions: `Accepted`, `Contested`, or `Refuted`.
-  - Real-time consensus convergence score (0% to 100%) tracking intellectual alignment.
+- [x] **Dynamic Persona Mutation (Self-Modifying Prompts):**
+  - Agents evolve their epistemic personas across turns by persisting concessions, paradigm shifts, and tactical updates to `workspace/personas/<agent_id>.txt`.
+  - In-memory adapters automatically reload evolved persona frameworks for subsequent interactions.
+- [x] **Ontology Proposition Graph & Convergence Scoring:**
+  - Automated classification of manifesto propositions: `Accepted`, `Contested`, or `Refuted` using sentence-level boundary extraction.
+  - Real-time consensus convergence alignment score (0% to 100%) tracking intellectual consensus with dynamic visual ASCII indicators.
 
 ---
 

@@ -48,6 +48,12 @@ turns: 3
 # Execution mode: 'ping_pong' (2 agents alternating), 'moderated' (3-agent council with Arbiter), or 'round_robin'
 mode: "ping_pong"
 
+# Dynamic persona mutation: evolve and persist persona prompts across turns
+mutate_personas: false
+
+# Dialectic consensus convergence tracking & proposition classification
+convergence_tracking: true
+
 # Maximum recent turns passed directly into the agent context
 max_history_turns: 6
 

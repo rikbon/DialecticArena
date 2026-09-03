@@ -38,6 +38,10 @@ class RichConsoleReporter:
             self._on_turn_complete(event)
         elif event.event_type == EventType.GIT_COMMITTED:
             self._on_git_committed(event)
+        elif event.event_type == EventType.PERSONA_MUTATED:
+            self._on_persona_mutated(event)
+        elif event.event_type == EventType.CONVERGENCE_EVALUATED:
+            self._on_convergence_evaluated(event)
         elif event.event_type == EventType.ARENA_COMPLETE:
             self._on_arena_complete(event)
         elif event.event_type == EventType.ERROR:
@@ -118,6 +122,22 @@ class RichConsoleReporter:
         )
         self.console.print()
 
+    def _on_persona_mutated(self, event: ArenaEvent) -> None:
+        agent_name = event.agent_name or event.agent_id or "Agent"
+        self.console.print(f"  [dim magenta][Persona Mutated] Dynamic cognitive framework adapted for '{agent_name}'[/dim magenta]\n")
+
+    def _on_convergence_evaluated(self, event: ArenaEvent) -> None:
+        report = event.payload.get("report")
+        if not report:
+            return
+        bar_filled = int(report.convergence_score / 5)
+        bar = f"[{'#' * bar_filled}{'-' * (20 - bar_filled)}]"
+        self.console.print(
+            f"  [bold cyan]Consensus Convergence:[/bold cyan] [bold green]{bar} {report.convergence_score:.1f}%[/bold green] "
+            f"({report.status_label}) | "
+            f"[green]{report.accepted_count} Accepted[/green], [yellow]{report.contested_count} Contested[/yellow], [red]{report.refuted_count} Refuted[/red]\n"
+        )
+
     def _on_turn_complete(self, event: ArenaEvent) -> None:
         pass
 
@@ -129,6 +149,7 @@ class RichConsoleReporter:
         manifesto_path = event.payload.get("manifesto_path", "")
         total_turns = event.payload.get("total_turns", 0)
         total_steps = event.payload.get("total_steps", 0)
+        report = event.payload.get("final_convergence")
 
         table = Table(title="Arena Session Summary", border_style="bright_green")
         table.add_column("Metric", style="cyan", justify="right")
@@ -137,6 +158,11 @@ class RichConsoleReporter:
         table.add_row("Interactions (Turns - Exchanges)", str(total_turns))
         table.add_row("Total Agent Responses Generated", str(total_steps))
         table.add_row("Shared Manifesto Document", manifesto_path)
+        if report:
+            table.add_row(
+                "Final Consensus Convergence",
+                f"{report.convergence_score:.1f}% ({report.status_label}) - {report.accepted_count} Accepted / {report.contested_count} Contested / {report.refuted_count} Refuted",
+            )
         table.add_row("Status", "[bold green]Completed Successfully[/bold green]")
 
         self.console.print()

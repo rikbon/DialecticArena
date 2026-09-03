@@ -10,9 +10,9 @@
 [![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex-blue.svg)]()
 [![Pi Agent](https://img.shields.io/badge/Pi%20Agent-Platform-purple.svg)]()
 [![Nous Hermes](https://img.shields.io/badge/Nous-Hermes-orange.svg)]()
-[![Tests Passing](https://img.shields.io/badge/Tests-21%20Passed-brightgreen.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-24%20Passed-brightgreen.svg)]()
 
-> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and APIs) over a shared living filesystem and automated Git timeline.**
+> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and APIs) over a shared living filesystem, automated Git timeline, and consensus convergence scoring.**
 
 Unlike conventional LLM wrappers that merely exchange ephemeral in-memory strings via chat endpoints, **Dialectic Arena** treats developer CLIs and local execution runtimes as first-class autonomous processes.
 
@@ -117,6 +117,17 @@ Execute simulations offline without token consumption or CLI binary dependencies
 python3 run.py run --mock --turns 3
 ```
 
+### 7. Dynamic Persona Mutation (Self-Modifying Prompts)
+When enabled (`--mutate-personas`), each agent's internal cognitive evolutions and philosophical concessions are persisted directly to `workspace/personas/<agent_id>.txt`. Subsequent interactions reload the mutated epistemic framework, allowing genuine philosophical convergence or paradigm drift across the debate.
+
+### 8. Ontology Proposition Graph & Convergence Scoring
+Automatically extracts propositions from `arena_manifesto.md` and evaluates their dialectic status:
+- **Accepted:** Consensus reached and verified across dialogue statements.
+- **Contested:** Active point of tension or ongoing deconstruction.
+- **Refuted:** Formal fallacies or invalidated claims abandoned by consensus.
+
+Generates a real-time mathematical alignment score ($0.0\%$ to $100.0\%$) and updates the shared manifesto document with progress indicators and structured proposition tables.
+
 ---
 
 ## Quick Start
@@ -190,7 +201,9 @@ python3 run.py run --config config/debates/system_design.yaml
 | `run` | `--mock` | Use offline simulated agents (no token costs) | `false` |
 | `run` | `--git` / `--no-git` | Automatically commit turn diffs to Git | `true` |
 | `run` | `--workspace`, `-w` | Directory path for output workspace artifacts | `workspace` |
-| `verify` | *(none)* | Health check on local `agy`, `claude`, `ollama`, `aider`, and `git` | — |
+| `run` | `--mutate-personas` | Evolve persona prompts dynamically across turns | `false` |
+| `run` | `--convergence` | Analyze and score dialectic consensus convergence | `true` |
+| `verify` | *(none)* | Health check on local `agy`, `claude`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and `git` | — |
 | `history`| `--workspace`, `-w` | List stored turn snapshots in a workspace | `workspace` |
 
 ---

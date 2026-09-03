@@ -38,6 +38,10 @@ class BaseAgentAdapter(ABC):
     def color(self) -> str:
         return self.config.color
 
+    def update_persona(self, new_persona: str) -> None:
+        """Update active persona content in memory for subsequent turns."""
+        self.persona = new_persona
+
     def build_prompt(self, context: TurnContext) -> str:
         """Construct a rich prompt containing persona, workspace context, and opponent thesis."""
         lines = [

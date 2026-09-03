@@ -171,7 +171,33 @@ The orchestrator does not directly invoke `print()` or handle formatting. Instea
 - `TURN_START` / `TURN_COMPLETE`
 - `STEP_START` / `STEP_COMPLETE`
 - `MANIFESTO_UPDATED` / `MEMORY_UPDATED`
+- `PERSONA_MUTATED`
+- `CONVERGENCE_EVALUATED`
 - `GIT_COMMITTED`
 - `ERROR`
 
 The `RichConsoleReporter` subscribes to these events and manages all styling, panels, and spinners. This clean separation enables easily attaching additional reporters in the future (e.g., WebSockets, JSON stream, Textual TUI, Discord webhooks).
+
+---
+
+## 6. Dialectic Convergence & Proposition Classification Engine
+
+The `ConvergenceAnalyzer` module (`src/agent_orchestrator/workspace/convergence.py`) extracts and tracks formal axioms, theorems, and claims across turns:
+- **Extraction:** Identifies propositions from `arena_manifesto.md` headers and bullet points.
+- **Classification:** Evaluates cross-agent dialogue history at the sentence level:
+  - `Accepted`: Verified mutual agreement, citations, or shared ontological axioms.
+  - `Contested`: Ongoing deconstruction, active points of tension, or irreconcilable premises.
+  - `Refuted`: Explicit concessions of fallacies or abandoned claims.
+- **Mathematical Alignment Formula:**
+  $$\text{Score} = \min\left(100.0, \frac{\text{Accepted} \times 1.0 + \text{Refuted} \times 0.6}{\text{Total Propositions}} \times 100\right)$$
+  *(Refutations contribute positively to consensus by acknowledging what has been formally falsified).*
+- **Manifesto Embedding:** Injects a dynamic `## Dialectic Convergence Status` section into `arena_manifesto.md` with ASCII progress indicators and proposition status tables.
+
+---
+
+## 7. Dynamic Persona Mutation (Self-Modifying Prompts)
+
+When `mutate_personas: true` is enabled:
+1. **Workspace Sandboxing:** Initial personas are seeded to `workspace/personas/<agent_id>.txt` from config or prompt templates.
+2. **Turn-by-Turn Adaptation:** When an agent produces an `### INTERNAL EVOLUTION` reflection containing paradigm shifts, concessions, or refined definitions, the orchestrator appends these cognitive shifts directly to the agent's dynamic persona file on disk.
+3. **In-Memory Adapter Reload:** The in-memory adapter instance reloads the evolved identity via `adapter.update_persona()`, ensuring that subsequent turn prompts operate from the agent's evolved philosophical stance rather than a static starting prompt.

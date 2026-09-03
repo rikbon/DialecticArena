@@ -19,6 +19,8 @@ class EventType(str, Enum):
     ROUND_COMPLETE = "turn_complete"   # Compatibility alias
     MANIFESTO_UPDATED = "manifesto_updated"
     MEMORY_UPDATED = "memory_updated"
+    PERSONA_MUTATED = "persona_mutated"
+    CONVERGENCE_EVALUATED = "convergence_evaluated"
     GIT_COMMITTED = "git_committed"
     ERROR = "error"
 

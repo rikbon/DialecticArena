@@ -53,6 +53,8 @@ class ArenaConfig(BaseModel):
     turns: int = Field(default=3, ge=1, le=50, description="Number of complete interactions ('botte e risposte')")
     rounds: Optional[int] = Field(default=None, description="Compatibility alias for turns")
     mode: str = Field(default="ping_pong", description="Debate mode: ping_pong, round_robin, moderated")
+    mutate_personas: bool = Field(default=False, description="Whether to dynamically evolve and persist persona prompts across turns")
+    convergence_tracking: bool = Field(default=True, description="Calculate proposition status and convergence alignment score")
     agents: dict[str, AgentConfig] = Field(default_factory=dict, description="Configured agents by ID")
     agent_order: list[str] = Field(default_factory=list, description="Ordered list of agent IDs for turns")
     workspace: WorkspaceConfig = Field(default_factory=WorkspaceConfig)

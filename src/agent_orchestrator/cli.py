@@ -118,6 +118,12 @@ def run(
     workspace: str = typer.Option(
         "workspace", "--workspace", "-w", help="Workspace directory for shared files"
     ),
+    mutate_personas: bool = typer.Option(
+        False, "--mutate-personas/--no-mutate-personas", help="Evolve persona prompt files dynamically across turns"
+    ),
+    convergence: bool = typer.Option(
+        True, "--convergence/--no-convergence", help="Analyze and score dialectic consensus convergence"
+    ),
 ):
     """Launch an autonomous debate session between CLI agents (each turn is a complete exchange)."""
     actual_turns = rounds if rounds is not None else turns
@@ -132,6 +138,9 @@ def run(
         if mock:
             for a in cfg.agents.values():
                 a.type = "mock"
+        if mutate_personas:
+            cfg.mutate_personas = mutate_personas
+        cfg.convergence_tracking = convergence
     else:
         cfg = create_default_config(
             topic=topic,
@@ -141,6 +150,8 @@ def run(
             git_track=git,
             workspace_dir=workspace,
         )
+        cfg.mutate_personas = mutate_personas
+        cfg.convergence_tracking = convergence
 
     # Initialize event bus and console renderer
     event_bus = EventBus()
