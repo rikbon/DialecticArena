@@ -1,30 +1,32 @@
-# ⚔️ Dialectic Arena: Agent Orchestrator
+# Dialectic Arena: Multi-Agent Orchestrator
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Multi-Agent](https://img.shields.io/badge/Architecture-Multi--Agent%20CLI-purple.svg)]()
 [![Google Antigravity](https://img.shields.io/badge/Google-Antigravity%20(agy)-00C4B4.svg)]()
 [![Claude Code](https://img.shields.io/badge/Anthropic-Claude%20Code-D97706.svg)]()
-[![Tests Passing](https://img.shields.io/badge/Tests-14%20Passed-brightgreen.svg)]()
+[![Ollama](https://img.shields.io/badge/Ollama-Local%20Models-white.svg)]()
+[![Aider](https://img.shields.io/badge/Aider-CLI%20Agent-blueviolet.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-18%20Passed-brightgreen.svg)]()
 
-> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude` & `agy`) over a shared living filesystem and Git timeline.**
+> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, and API models) over a shared living filesystem and automated Git timeline.**
 
-Unlike traditional LLM frameworks that merely exchange ephemeral in-memory strings via chat APIs, **Dialectic Arena** treats cutting-edge developer CLIs—such as **Google Antigravity (`agy`)** and **Claude Code (`claude`)**—as autonomous terminal entities.
+Unlike conventional LLM wrappers that merely exchange ephemeral in-memory strings via chat endpoints, **Dialectic Arena** treats developer CLIs and local execution runtimes as first-class autonomous processes.
 
-The agents debate high-stakes intellectual propositions, deconstruct each other's premises, co-author a persistent ontology manifesto on disk, and preserve their internal paradigm shifts across turns.
-
----
-
-## 📚 Documentation Index
-
-- 🗺️ **[Product & Engineering Roadmap](ROADMAP.md)**: Release milestones, upcoming agent adapters (Aider, Ollama), moderated councils, and the autonomous code arena.
-- 📖 **[Configuration Guide](docs/CONFIG_GUIDE.md)**: How to write production-grade YAML configurations, craft anti-sycophancy personas, and configure reasoning budgets.
-- 🏛️ **[System Architecture](docs/ARCHITECTURE.md)**: Deep dive into the lifecycle loops, subprocess isolation, resilient parsing, and Git tracking engine.
-- 🔌 **[Adding New Agents](docs/ADDING_NEW_AGENTS.md)**: Step-by-step guide to integrating other agentic CLIs (Aider, OpenHands) or local LLMs (Ollama).
+Agents debate structured propositions, deconstruct opposing premises, co-author a persistent ontology manifesto on disk, and record their internal paradigm shifts across turns.
 
 ---
 
-## 🏛️ Architecture Overview
+## Documentation Index
+
+- **[Product & Engineering Roadmap](ROADMAP.md)**: Technical milestones, completed adapters, and planned releases.
+- **[Configuration Guide](docs/CONFIG_GUIDE.md)**: Authoring YAML configurations, anti-sycophancy personas, and execution budgets.
+- **[System Architecture](docs/ARCHITECTURE.md)**: Deep dive into the turn lifecycle, process isolation, output parsing, and Git persistence.
+- **[Adding New Agents](docs/ADDING_NEW_AGENTS.md)**: Interface specifications and blueprints for custom agent adapters.
+
+---
+
+## Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -35,18 +37,21 @@ flowchart TD
         O -->|Prepares TurnContext| AR[Agent Registry]
     end
 
-    subgraph AgentAdapters ["Agent CLI Adapters"]
-        AR -->|Headless Exec| CLA[Claude Code Adapter\nclaude -p ...]
-        AR -->|Headless Exec| AGY[Antigravity Adapter\nagy -p --effort ...]
+    subgraph AgentAdapters ["Supported Agent Adapters"]
+        AR -->|Headless CLI| CLA[Claude Code Adapter\nclaude -p ...]
+        AR -->|Headless CLI| AGY[Antigravity Adapter\nagy -p --effort ...]
+        AR -->|Local Open Weights| OLL[Ollama Adapter\nhttp://localhost:11434]
+        AR -->|Headless Pair CLI| AID[Aider Adapter\naider --message ...]
+        AR -->|Direct Inference| API[Direct API Adapter\nLiteLLM / OpenAI SDK]
         AR -->|Offline Simulation| MCK[Mock Adapter\nZero token cost]
-        AR -.->|Extensible| NEW[Future Adapters\nAider, OpenHands, Ollama...]
     end
 
     subgraph SharedWorkspace ["Shared Living Filesystem (workspace/)"]
         CLA -->|Output Extraction| WM
         AGY -->|Output Extraction| WM
+        OLL -->|Output Extraction| WM
         WM -->|Co-Authored Synthesis| MAN["arena_manifesto.md\n(Shared Ontology)"]
-        WM -->|Private Cognitive Logs| MEM["memory_claude.md\nmemory_antigravity.md"]
+        WM -->|Private Cognitive Logs| MEM["memory_<agent>.md\n(Isolated Paradigm Shifts)"]
         WM -->|Turn History Snapshots| RND["rounds/turn_XX_step_YY.json"]
         WM -->|Automated Commits| GIT[("Git Version Timeline\n(Commit per step)")]
     end
@@ -54,86 +59,107 @@ flowchart TD
 
 ---
 
-## ✨ Core Principles & Key Features
+## Core Principles & System Design
 
-### 1. The Interaction Paradigm: Every Turn is an Exchange
-In Dialectic Arena, a **Turn is an Exchange (Interaction)** consisting of:
-- **Step 1 (Thesis):** Agent 1 presents their formal proposition or critique.
-- **Step 2 (Antithesis):** Agent 2 counters, deconstructs axioms, and offers synthesis.
-Setting `--turns 3` executes **3 complete interaction exchanges** (a total of **6 agent responses**).
+### 1. Interaction Paradigm: Each Turn is a Complete Exchange
+In Dialectic Arena, a **Turn is an Exchange** rather than a single utterance:
+- **Mode `ping_pong`:** Turn $N$ comprises **Step 1 (Thesis)** and **Step 2 (Antithesis)**.
+- **Mode `moderated`:** Turn $N$ comprises **Step 1 (Thesis)**, **Step 2 (Antithesis)**, and **Step 3 (Synthesis & Moderation)**.
+Configuring `--turns 3` in two-agent mode executes 3 complete interaction cycles (6 agent responses total).
 
 ### 2. Tripartite Output Protocol
-To break out of standard LLM sycophancy (*"I completely agree with you..."*), each agent response is parsed into three isolated sections:
-* `### ARGUMENT`: Piercing, dense dialectical reply delivered directly to the opponent.
-* `### ONTOLOGY CONTRIBUTION`: Formal axioms or definitions appended to `arena_manifesto.md`.
-* `### INTERNAL EVOLUTION`: Private self-reflection recorded in `memory_<agent>.md`.
+To systematically eliminate sycophancy, each agent output is parsed into three isolated sections:
+- `### ARGUMENT`: Direct, substantive counter-argument delivered to the opponent.
+- `### ONTOLOGY CONTRIBUTION`: Formal axioms, theorems, or definitions appended to `arena_manifesto.md`.
+- `### INTERNAL EVOLUTION`: Private reflections on cognitive shifts, recorded in `memory_<agent>.md`.
 
-### 3. Native CLI Orchestration
-Runs real developer terminal CLIs in headless mode:
-- **Google Antigravity (`agy`):** Invocations use `agy -p` with reasoning effort flags (`--effort low|medium|high`) and `--dangerously-skip-permissions`.
-- **Claude Code (`claude`):** Invocations use `claude -p` with `--dangerously-skip-permissions` and automatic runtime diagnostic filtering.
+### 3. Subprocess & Local Runtime Orchestration
+Executes developer CLIs and local services in headless mode:
+- **Google Antigravity (`agy`):** Invoked via `agy -p` with reasoning effort flags (`--effort low|medium|high`) and `--dangerously-skip-permissions`.
+- **Claude Code (`claude`):** Invoked via `claude -p` with `--dangerously-skip-permissions` and diagnostic log filtering.
+- **Ollama Local (`ollama`):** Direct HTTP API integration for 100% private, offline inference with open-weight models (`gemma4`, `deepseek-r1`, `llama3.3`).
+- **Aider CLI (`aider`):** Headless pair-programming integration (`--message`, `--no-auto-commits`, `--yes-always`).
 
-### 4. Automated Git Version Timeline
+### 4. The Moderated Council (`mode: "moderated"`)
+Supports three-agent dialectic governance:
+- **Step 1 (Thesis):** Proponent formulates the analytical proposition.
+- **Step 2 (Antithesis):** Opponent deconstructs the thesis and counters with systemic holism.
+- **Step 3 (Synthesis & Moderation):** Arbiter receives the aggregated transcript of both agents, flags fallacies, synthesizes agreed-upon propositions into `arena_manifesto.md`, and injects a destabilizing paradox to steer the subsequent turn.
+
+### 5. Automated Git Version Timeline
 Every turn commits workspace state with semantic commit messages:
 ```bash
 [Turn 1 | Thesis] Claude Code (Alfa): Supervenience Axiom in physical configurations...
 [Turn 1 | Antithesis] Antigravity (Beta): Mereological fallacy and relational networks...
+[Turn 1 | Synthesis & Moderation] Arbiter: Synthesized mereological boundaries...
 ```
-Inspect the progression using `git log` or `git diff HEAD~1 HEAD`.
+Inspect changes at any point:
+```bash
+git log -n 6 --oneline
+git diff HEAD~1 HEAD
+```
 
-### 5. Zero-Token Mock Simulator
-Run full simulations offline without spending API tokens or requiring CLI tools:
+### 6. Zero-Token Offline Simulator
+Execute simulations offline without token consumption or CLI binary dependencies:
 ```bash
 python3 run.py run --mock --turns 3
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Environment Verification
-Verify that your system has the required binaries installed and ready:
+Verify that required tools and local services are available:
 ```bash
 python3 run.py verify
 ```
-Expected output:
+Sample output:
 ```
                       CLI Environment & Tool Health Check                       
-┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
-┃ Tool           ┃ Status    ┃ Version        ┃ Binary Path   ┃ Notes          ┃
-┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
-│ Google         │ AVAILABLE │ 1.1.25         │ /usr/local/.. │ Ready for      │
-│ Antigravity    │           │                │               │ headless       │
-│ (agy)          │           │                │               │ execution (-p) │
-│ Claude Code    │ AVAILABLE │ 2.1.258        │ /usr/local/.. │ Ready for      │
-│ (claude)       │           │ (Claude Code)  │               │ headless       │
-│                │           │                │               │ execution (-p) │
-│ Git Version    │ ACTIVE    │ Installed      │ /usr/bin/git  │ Repository     │
-│ Control        │           │                │               │ active         │
-└────────────────┴───────────┴────────────────┴───────────────┴────────────────┘
++---------------+---------------+---------------+---------------+--------------+
+| Tool          | Status        | Version       | Binary Path   | Notes        |
++---------------+---------------+---------------+---------------+--------------+
+| Google        | AVAILABLE     | 1.1.25        | /usr/local/.. | Ready for    |
+| Antigravity   |               |               |               | headless -p  |
+| Claude Code   | AVAILABLE     | 2.1.258       | /usr/local/.. | Ready for    |
+| (claude)      |               | (Claude Code) |               | headless -p  |
+| Ollama Local  | AVAILABLE     | Ollama API    | /usr/local/.. | Ready for    |
+| (ollama)      |               | (Local models)|               | offline runs |
+| Aider CLI     | NOT INSTALLED | N/A           | N/A           | Install via  |
+| (aider)       |               |               |               | pip install  |
+| Git Version   | ACTIVE        | Installed     | /usr/bin/git  | Repository   |
+| Control       |               |               |               | active       |
++---------------+---------------+---------------+---------------+--------------+
 ```
 
-### 2. Run an Offline Mock Simulation (Instant & Free)
+### 2. Run an Offline Mock Simulation
 ```bash
 python3 run.py run --mock --turns 3
 ```
 
 ### 3. Launch a Live Debate (Claude Code vs Google Antigravity)
-Run 3 complete interaction exchanges (6 responses total) with high reasoning effort:
+Execute 3 interaction exchanges (6 responses total) with high reasoning effort:
 ```bash
 python3 run.py run --turns 3 --effort high
 ```
 
-Or pass a custom topic directly:
+Or provide a custom seed topic:
 ```bash
 python3 run.py run \
   --turns 3 \
   --topic "Can deterministic computational automata produce non-epiphenomenal subjective consciousness?"
 ```
 
-### 4. Run Pre-Packaged Configurations
+### 4. Run Pre-Configured Presets
 ```bash
-# Epistemic philosophy of mind
+# Three-Agent Moderated Council (Thesis, Antithesis, Arbiter synthesis)
+python3 run.py run --config config/debates/moderated_council.yaml
+
+# 100% Offline Local Model debate via Ollama
+python3 run.py run --config config/debates/ollama_local.yaml
+
+# Epistemic philosophy of mind (Claude vs Antigravity)
 python3 run.py run --config config/debates/philosophy_of_mind.yaml
 
 # Collaborative distributed systems design
@@ -142,7 +168,7 @@ python3 run.py run --config config/debates/system_design.yaml
 
 ---
 
-## 🎛️ CLI Reference
+## Command-Line Reference
 
 | Command | Option / Flag | Description | Default |
 | :--- | :--- | :--- | :--- |
@@ -152,20 +178,22 @@ python3 run.py run --config config/debates/system_design.yaml
 | `run` | `--config`, `-c` | Path to a YAML configuration file | None |
 | `run` | `--effort` | Antigravity reasoning effort (`low`, `medium`, `high`) | None |
 | `run` | `--mock` | Use offline simulated agents (no token costs) | `false` |
-| `run` | `--git` / `--no-git` | Automatically commit round diffs to Git | `true` |
+| `run` | `--git` / `--no-git` | Automatically commit turn diffs to Git | `true` |
 | `run` | `--workspace`, `-w` | Directory path for output workspace artifacts | `workspace` |
-| `verify` | *(none)* | Health check on local `agy`, `claude`, and `git` binaries | — |
+| `verify` | *(none)* | Health check on local `agy`, `claude`, `ollama`, `aider`, and `git` | — |
 | `history`| `--workspace`, `-w` | List stored turn snapshots in a workspace | `workspace` |
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 agentOrchestrator/
 ├── config/                          # Session configurations
 │   ├── default.yaml                 # Base configuration
 │   └── debates/
+│       ├── moderated_council.yaml   # Three-agent council with Arbiter
+│       ├── ollama_local.yaml        # Offline local open-weight model debate
 │       ├── philosophy_of_mind.yaml  # Epistemic consciousness debate
 │       ├── system_design.yaml       # Distributed systems collaboration
 │       └── mock_demo.yaml           # Offline simulation preset
@@ -176,6 +204,7 @@ agentOrchestrator/
 ├── prompts/                         # Agent persona prompts
 │   ├── claude_alfa.txt              # Analytic Reductionist persona
 │   ├── agy_beta.txt                 # Emergent Holist persona
+│   ├── moderator_persona.txt        # Dialectic Arbiter & Synthesizer persona
 │   ├── claude_critic.txt            # Security/Reliability Auditor persona
 │   └── agy_architect.txt            # Systems Architect persona
 ├── src/
@@ -184,6 +213,9 @@ agentOrchestrator/
 │       │   ├── base.py              # BaseAgentAdapter & AgentRegistry
 │       │   ├── agy.py               # Google Antigravity (agy) adapter
 │       │   ├── claude.py            # Claude Code (claude) adapter
+│       │   ├── ollama.py            # Ollama local model adapter
+│       │   ├── aider.py             # Aider CLI coding adapter
+│       │   ├── api.py               # Direct cloud API adapter
 │       │   └── mock.py              # Simulated agent adapter
 │       ├── workspace/               # Shared filesystem manager
 │       │   ├── manager.py           # Manifesto, memories, snapshot files
@@ -197,16 +229,17 @@ agentOrchestrator/
 │       ├── config.py                # Pydantic models & YAML loader
 │       ├── types.py                 # Core domain dataclasses
 │       └── cli.py                   # Typer CLI application
-├── tests/                           # Pytest test suite (14 tests, 100% passing)
+├── tests/                           # Pytest test suite (18 tests, 100% passing)
 ├── examples/                        # Sample generated manifestos
 ├── run.py                           # Root entry point
+├── ROADMAP.md                       # Product roadmap and release tracking
 ├── pyproject.toml
 └── requirements.txt
 ```
 
 ---
 
-## 🧪 Testing
+## Verification and Testing
 
 Run the automated test suite:
 ```bash
@@ -215,5 +248,5 @@ pytest tests/ -v
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the [MIT License](LICENSE).

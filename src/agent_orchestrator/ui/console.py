@@ -50,7 +50,7 @@ class RichConsoleReporter:
 
         agent_badges = "  ".join([f"[bold]{name}[/bold] (`{aid}`)" for aid, name in agents.items()])
 
-        title_text = Text("⚔️  DIALECTIC ARENA: MULTI-AGENT AUTONOMOUS DEBATE  ⚔️", style="bold yellow")
+        title_text = Text("DIALECTIC ARENA: MULTI-AGENT AUTONOMOUS DEBATE", style="bold yellow")
         content = (
             f"[bold cyan]Seed Topic:[/bold cyan]\n"
             f"[italic white]{topic}[/italic white]\n\n"
@@ -91,13 +91,13 @@ class RichConsoleReporter:
 
         if res.ontology_contribution:
             body_parts.append(
-                f"[bold green]📜 Proposed Ontology Contribution:[/bold green]\n"
+                f"[bold green]Proposed Ontology Contribution:[/bold green]\n"
                 f"[italic]{res.ontology_contribution}[/italic]"
             )
 
         if res.internal_evolution:
             body_parts.append(
-                f"[bold yellow]🧠 Cognitive Evolution (Private):[/bold yellow]\n"
+                f"[bold yellow]Cognitive Evolution (Private):[/bold yellow]\n"
                 f"[dim italic]{res.internal_evolution}[/dim italic]"
             )
 
@@ -123,7 +123,7 @@ class RichConsoleReporter:
 
     def _on_git_committed(self, event: ArenaEvent) -> None:
         commit = event.payload.get("commit_hash", "")
-        self.console.print(f"  [dim green]✔ Workspace state committed to Git (`{commit}`)[/dim green]\n")
+        self.console.print(f"  [dim green][Committed] Workspace state saved to Git (`{commit}`)[/dim green]\n")
 
     def _on_arena_complete(self, event: ArenaEvent) -> None:
         manifesto_path = event.payload.get("manifesto_path", "")

@@ -1,25 +1,26 @@
-# 🛠️ Comprehensive Configuration Guide
+# Dialectic Arena: Configuration Guide
 
-This guide explains how to design, customize, and optimize YAML configuration files for the **Dialectic Arena (Agent Orchestrator)**.
+This technical guide documents the specification, schema reference, and best practices for creating YAML configuration files in the Dialectic Arena orchestrator.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [Overview](#overview)
 2. [Complete Schema Reference](#complete-schema-reference)
    - [Root Options](#root-options)
    - [Workspace Configuration (`workspace`)](#workspace-configuration-workspace)
    - [Agent Configuration (`agents`)](#agent-configuration-agents)
-3. [The Art of Persona Crafting](#the-art-of-persona-crafting)
+3. [Persona Engineering Principles](#persona-engineering-principles)
    - [Asymmetric Epistemic Roles](#asymmetric-epistemic-roles)
    - [Enforcing the Tripartite Protocol](#enforcing-the-tripartite-protocol)
-   - [Preventing Sycophancy](#preventing-sycophancy)
-4. [Full Production Examples](#full-production-examples)
+   - [Eliminating Sycophancy](#eliminating-sycophancy)
+4. [Production Configuration Examples](#production-configuration-examples)
    - [1. Epistemic Philosophy Debate](#1-epistemic-philosophy-debate)
    - [2. Distributed Systems Architecture Design](#2-distributed-systems-architecture-design)
-   - [3. Code Security & Vulnerability Audit](#3-code-security--vulnerability-audit)
+   - [3. Code Security and Vulnerability Audit](#3-code-security--vulnerability-audit)
    - [4. Three-Agent Moderated Council](#4-three-agent-moderated-council)
-5. [CLI Overrides & Precedence](#cli-overrides--precedence)
+   - [5. Offline Local Model Debate via Ollama](#5-100-offline-local-model-debate-via-ollama)
+5. [CLI Overrides and Precedence](#5-cli-overrides--precedence)
 
 ---
 
@@ -44,7 +45,7 @@ topic: "Can a deterministic computational automaton produce non-epiphenomenal su
 # Each turn consists of a complete cycle where both agents speak (Thesis & Antithesis)
 turns: 3
 
-# Execution mode: 'ping_pong' (2 agents alternating) or 'round_robin' (N agents in sequence)
+# Execution mode: 'ping_pong' (2 agents alternating), 'moderated' (3-agent council with Arbiter), or 'round_robin'
 mode: "ping_pong"
 
 # Maximum recent turns passed directly into the agent context
@@ -59,31 +60,50 @@ workspace:
   autonomous_tools: false              # Allow agents to modify files directly via their tools
 
 # Agent Definitions
+# Supported types: 'claude', 'agy', 'ollama', 'aider', 'api', 'mock'
 agents:
   claude:
-    type: "claude"                     # Adapter type: 'claude', 'agy', 'mock', etc.
+    type: "claude"                     # Claude Code CLI
     name: "Claude Code (Alfa)"         # Display name in UI and Git history
     role: "Analytical Reductionist"    # Epistemic role summary
-    color: "bright_magenta"            # Rich color tag: cyan, magenta, green, yellow, blue, etc.
+    color: "bright_magenta"            # Rich color tag
     persona_file: "prompts/claude_alfa.txt" # Path to system prompt text file
     model: "claude-3-7-sonnet"         # (Optional) Model override flag
     timeout_seconds: 240               # Maximum execution time per step
     dangerously_skip_permissions: true # Bypass CLI interactive permission prompts
-    extra_args: []                     # Additional CLI flags passed directly to binary
-    env: {}                            # Custom environment variables for this process
 
   antigravity:
-    type: "agy"                        # Adapter type: 'agy' (Google Antigravity)
+    type: "agy"                        # Google Antigravity CLI
     name: "Antigravity (Beta)"         # Display name
     role: "Systemic Emergentist"       # Epistemic role summary
     color: "bright_cyan"               # Rich color tag
     persona_file: "prompts/agy_beta.txt" # Path to system prompt text file
     effort: "high"                     # Antigravity reasoning effort: 'low', 'medium', 'high'
-    model: "gemini-2.5-pro"            # (Optional) Model override flag
     timeout_seconds: 240               # Maximum execution time per step
     dangerously_skip_permissions: true # Bypass CLI interactive permission prompts
-    extra_args: []                     # Additional CLI flags
-    env: {}                            # Custom environment variables
+
+  local_model:
+    type: "ollama"                     # Local open-weight models via Ollama API
+    name: "DeepSeek / Llama"
+    role: "Formal Epistemologist"
+    color: "bright_green"
+    model: "gemma4:31b-cloud"          # Target model tag in Ollama
+    env:
+      OLLAMA_HOST: "http://localhost:11434" # (Optional) Custom Ollama server URL
+
+  pair_coder:
+    type: "aider"                      # Aider CLI coding assistant
+    name: "Aider Assistant"
+    role: "Pair Programming Implementer"
+    color: "bright_yellow"
+    model: "gpt-4o"
+
+  cloud_inference:
+    type: "api"                        # Direct cloud inference via LiteLLM / OpenAI
+    name: "Cloud Model"
+    role: "Domain Specialist"
+    color: "bright_blue"
+    model: "gpt-4o"                    # Any model string supported by LiteLLM
 
 # Turn execution order (IDs must match keys in 'agents')
 agent_order:
@@ -234,6 +254,86 @@ agents:
 agent_order:
   - "auditor"
   - "defender"
+```
+
+### 4. Three-Agent Moderated Council
+Save as `config/debates/moderated_council.yaml`:
+```yaml
+topic: "Can a deterministic computational automaton produce non-epiphenomenal subjective qualia, or is consciousness an ontological primitive?"
+turns: 2
+mode: "moderated"
+
+workspace:
+  dir_path: "workspace_council"
+  manifesto_filename: "arena_manifesto.md"
+  git_track: true
+
+agents:
+  claude:
+    type: "claude"
+    name: "Claude Code (Alfa)"
+    role: "Analytical Pragmatism & Computational Reductionism"
+    color: "bright_magenta"
+    persona_file: "prompts/claude_alfa.txt"
+    timeout_seconds: 240
+
+  antigravity:
+    type: "agy"
+    name: "Antigravity (Beta)"
+    role: "Complex Systems Theory & Phenomenological Emergence"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_beta.txt"
+    effort: "high"
+    timeout_seconds: 240
+
+  moderator:
+    type: "mock" # Can be set to 'agy', 'claude', or 'ollama'
+    name: "Arbiter (Moderator)"
+    role: "Dialectic Arbiter, Fallacy Detector & Synthesis Architect"
+    color: "bright_yellow"
+    persona_file: "prompts/moderator_persona.txt"
+    timeout_seconds: 240
+
+agent_order:
+  - "claude"
+  - "antigravity"
+  - "moderator"
+```
+
+### 5. 100% Offline Local Model Debate via Ollama
+Save as `config/debates/ollama_local.yaml`:
+```yaml
+topic: "Can computational consciousness functionally equate to phenomenal qualia, or is subjectivity non-computable?"
+turns: 3
+mode: "ping_pong"
+
+workspace:
+  dir_path: "workspace_ollama"
+  manifesto_filename: "arena_manifesto.md"
+  git_track: true
+
+agents:
+  local_alfa:
+    type: "ollama"
+    name: "Gemma Local (Alfa)"
+    role: "Analytical Functionalism & Physicalist Epistemology"
+    color: "bright_magenta"
+    model: "gemma4:31b-cloud"
+    persona_file: "prompts/claude_alfa.txt"
+    timeout_seconds: 180
+
+  antigravity:
+    type: "agy"
+    name: "Antigravity (Beta)"
+    role: "Emergent Complex Systems & Phenomenological Holism"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_beta.txt"
+    effort: "high"
+    timeout_seconds: 240
+
+agent_order:
+  - "local_alfa"
+  - "antigravity"
 ```
 
 ---

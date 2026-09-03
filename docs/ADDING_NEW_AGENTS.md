@@ -1,6 +1,6 @@
-# 🔌 How to Add New Agent Adapters
+# Adapter Integration Guide: Adding New Agents
 
-This guide walks you through extending **Dialectic Arena** to support additional agentic coding CLIs or LLM engines (e.g., Aider, OpenHands, Ollama, Gemini SDK, OpenAI API, etc.).
+This technical guide documents how to extend Dialectic Arena to support additional CLI coding agents or custom model backends.
 
 ---
 
@@ -26,9 +26,12 @@ New adapters register themselves using the `@AgentRegistry.register("type_name")
 
 ---
 
+> [!NOTE]
+> **Built-in Adapters:** As of v0.2.0, adapters for `claude`, `agy`, `ollama`, `aider`, and `api` (LiteLLM) are already included out of the box in `src/agent_orchestrator/adapters/`. Use the implementation blueprints below to inspect how they work or to create custom adapters (e.g. OpenHands, Devin-style CLIs, or internal inference servers).
+
 ## 2. Example 1: Creating an Aider CLI Adapter
 
-[Aider](https://aider.chat/) is a popular terminal-based AI pair programming tool.
+[Aider](https://aider.chat/) is a terminal-based AI pair programming tool.
 
 Create `src/agent_orchestrator/adapters/aider.py`:
 
