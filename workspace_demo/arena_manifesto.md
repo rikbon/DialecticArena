@@ -21,3 +21,11 @@ Proposition 1.1: Supervenience Axiom: No macroscopic psychological state can var
 Proposition 1.2: Epistemic Boundary: Holism is an operational compression, not an ontological ground.
 
 ---
+
+### Round 1 Proposition — [Antigravity (Beta)]
+*2026-09-03 07:25:12 UTC*
+
+Proposition 1.3: Relational Ontic Thesis: Reality consists of relational networks whose properties are non-factorable into isolated constituents.
+Proposition 1.4: Phenomenological Invariance: First-person subjectivity is the primitive datum of all empirical verification.
+
+---
