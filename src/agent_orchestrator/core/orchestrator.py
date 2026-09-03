@@ -1,0 +1,246 @@
+"""
+Core orchestration loop for multi-agent debates and collaborations.
+Coordinates turn taking, workspace persistence, event emission, and git tracking.
+"""
+
+from pathlib import Path
+from typing import Optional
+
+from agent_orchestrator.adapters.base import AgentRegistry, BaseAgentAdapter
+from agent_orchestrator.config import ArenaConfig
+from agent_orchestrator.core.events import EventBus
+from agent_orchestrator.types import (
+    ArenaEvent,
+    EventType,
+    HealthCheckResult,
+    TurnContext,
+    TurnResult,
+)
+from agent_orchestrator.workspace.manager import WorkspaceManager
+
+
+class Orchestrator:
+    """Orchestrates turn-based interactions between CLI agents."""
+
+    def __init__(
+        self,
+        config: ArenaConfig,
+        base_dir: Optional[Path] = None,
+        event_bus: Optional[EventBus] = None,
+    ):
+        self.config = config
+        self.base_dir = (base_dir or Path.cwd()).resolve()
+        self.event_bus = event_bus or EventBus()
+        self.workspace = WorkspaceManager(config.workspace, base_dir=self.base_dir)
+        self.adapters: dict[str, BaseAgentAdapter] = {}
+
+    def initialize(self) -> None:
+        """Initialize workspace and instantiate all configured agent adapters."""
+        self.workspace.initialize(self.config.topic, self.config.agents)
+
+        for agent_id, agent_cfg in self.config.agents.items():
+            adapter = AgentRegistry.create(
+                agent_id=agent_id,
+                config=agent_cfg,
+                workspace_dir=self.workspace.workspace_dir,
+                base_dir=self.base_dir,
+            )
+            self.adapters[agent_id] = adapter
+
+    def check_agents_health(self) -> dict[str, HealthCheckResult]:
+        """Perform health checks on all configured agents."""
+        results = {}
+        for agent_id, adapter in self.adapters.items():
+            results[agent_id] = adapter.health_check()
+        return results
+
+    def run(self) -> list[TurnResult]:
+        """Run the full debate loop according to configured rounds and agents."""
+        if not self.adapters:
+            self.initialize()
+
+        ordered_agents = self.config.get_ordered_agents()
+        if len(ordered_agents) < 2:
+            raise ValueError("At least two agents are required to run an arena debate.")
+
+        all_results: list[TurnResult] = []
+        turn_counter = 0
+
+        # Emit ARENA_START
+        self.event_bus.dispatch(
+            ArenaEvent(
+                event_type=EventType.ARENA_START,
+                payload={
+                    "topic": self.config.topic,
+                    "rounds": self.config.rounds,
+                    "agents": {aid: acfg.name for aid, acfg in ordered_agents},
+                },
+            )
+        )
+
+        current_input = self.config.topic
+        last_agent_id = ordered_agents[-1][0]
+        last_agent_name = ordered_agents[-1][1].name
+        last_agent_role = ordered_agents[-1][1].role
+
+        try:
+            for r in range(1, self.config.rounds + 1):
+                self.event_bus.dispatch(
+                    ArenaEvent(
+                        event_type=EventType.ROUND_START,
+                        round_num=r,
+                        payload={"round": r, "total_rounds": self.config.rounds},
+                    )
+                )
+
+                for agent_id, agent_cfg in ordered_agents:
+                    turn_counter += 1
+                    adapter = self.adapters[agent_id]
+
+                    # Read current workspace state
+                    manifesto = self.workspace.read_manifesto()
+                    agent_memory = self.workspace.read_memory(agent_id)
+
+                    context = TurnContext(
+                        round_num=r,
+                        turn_num=turn_counter,
+                        agent_id=agent_id,
+                        agent_name=adapter.name,
+                        agent_role=adapter.role,
+                        opponent_id=last_agent_id,
+                        opponent_name=last_agent_name,
+                        opponent_role=last_agent_role,
+                        opponent_dialogue=current_input,
+                        topic=self.config.topic,
+                        manifesto_content=manifesto,
+                        agent_memory=agent_memory,
+                    )
+
+                    # Notify turn start
+                    self.event_bus.dispatch(
+                        ArenaEvent(
+                            event_type=EventType.TURN_START,
+                            round_num=r,
+                            turn_num=turn_counter,
+                            agent_id=agent_id,
+                            agent_name=adapter.name,
+                            payload={"context": context},
+                        )
+                    )
+
+                    # Execute turn
+                    result = adapter.execute_turn(context)
+                    all_results.append(result)
+
+                    # Handle turn updates
+                    if result.is_success:
+                        # 1. Update manifesto if ontology contribution present
+                        if result.ontology_contribution:
+                            self.workspace.update_manifesto(
+                                agent_name=adapter.name,
+                                round_num=r,
+                                contribution=result.ontology_contribution,
+                            )
+                            self.event_bus.dispatch(
+                                ArenaEvent(
+                                    event_type=EventType.MANIFESTO_UPDATED,
+                                    round_num=r,
+                                    turn_num=turn_counter,
+                                    agent_id=agent_id,
+                                    agent_name=adapter.name,
+                                    payload={"contribution": result.ontology_contribution},
+                                )
+                            )
+
+                        # 2. Update agent memory log
+                        if result.internal_evolution:
+                            self.workspace.append_memory(
+                                agent_id=agent_id,
+                                agent_name=adapter.name,
+                                round_num=r,
+                                evolution=result.internal_evolution,
+                            )
+                            self.event_bus.dispatch(
+                                ArenaEvent(
+                                    event_type=EventType.MEMORY_UPDATED,
+                                    round_num=r,
+                                    turn_num=turn_counter,
+                                    agent_id=agent_id,
+                                    agent_name=adapter.name,
+                                    payload={"evolution": result.internal_evolution},
+                                )
+                            )
+
+                        # 3. Save JSON turn snapshot
+                        self.workspace.save_round_snapshot(
+                            round_num=r,
+                            turn_num=turn_counter,
+                            agent_id=agent_id,
+                            result=result,
+                        )
+
+                        # 4. Optional git commit
+                        commit_hash = self.workspace.commit_turn(
+                            agent_name=adapter.name,
+                            round_num=r,
+                            turn_num=turn_counter,
+                            summary=result.dialogue[:60],
+                        )
+                        if commit_hash:
+                            self.event_bus.dispatch(
+                                ArenaEvent(
+                                    event_type=EventType.GIT_COMMITTED,
+                                    round_num=r,
+                                    turn_num=turn_counter,
+                                    agent_id=agent_id,
+                                    agent_name=adapter.name,
+                                    payload={"commit_hash": commit_hash},
+                                )
+                            )
+
+                    # Notify turn completion
+                    self.event_bus.dispatch(
+                        ArenaEvent(
+                            event_type=EventType.TURN_COMPLETE,
+                            round_num=r,
+                            turn_num=turn_counter,
+                            agent_id=agent_id,
+                            agent_name=adapter.name,
+                            payload={"result": result},
+                        )
+                    )
+
+                    # Update context for the next turn
+                    current_input = result.dialogue
+                    last_agent_id = agent_id
+                    last_agent_name = adapter.name
+                    last_agent_role = adapter.role
+
+                self.event_bus.dispatch(
+                    ArenaEvent(
+                        event_type=EventType.ROUND_COMPLETE,
+                        round_num=r,
+                        payload={"round": r},
+                    )
+                )
+
+        except KeyboardInterrupt:
+            self.event_bus.dispatch(
+                ArenaEvent(
+                    event_type=EventType.ERROR,
+                    payload={"error": "Debate interrupted by user."},
+                )
+            )
+
+        # Emit ARENA_COMPLETE
+        self.event_bus.dispatch(
+            ArenaEvent(
+                event_type=EventType.ARENA_COMPLETE,
+                payload={
+                    "total_turns": len(all_results),
+                    "manifesto_path": str(self.workspace.manifesto_path),
+                },
+            )
+        )
+
+        return all_results

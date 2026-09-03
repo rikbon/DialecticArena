@@ -1,0 +1,235 @@
+"""
+Command-line interface (CLI) for Dialectic Arena (Agent Orchestrator).
+Powered by Typer for clean CLI commands and help flags.
+"""
+
+from pathlib import Path
+from typing import Optional
+import typer
+from rich.console import Console
+from rich.table import Table
+
+from agent_orchestrator.adapters.base import AgentRegistry
+from agent_orchestrator.config import (
+    AgentConfig,
+    ArenaConfig,
+    WorkspaceConfig,
+    load_config,
+)
+from agent_orchestrator.core.events import EventBus
+from agent_orchestrator.core.orchestrator import Orchestrator
+from agent_orchestrator.ui.console import RichConsoleReporter
+
+app = typer.Typer(
+    name="dialectic-arena",
+    help="Autonomous Agent-to-Agent Debate & Collaboration Arena (Claude Code vs Google Antigravity).",
+    add_completion=False,
+)
+console = Console()
+
+
+def create_default_config(
+    topic: Optional[str] = None,
+    rounds: int = 3,
+    mock: bool = False,
+    effort: Optional[str] = None,
+    git_track: bool = True,
+    workspace_dir: str = "workspace",
+) -> ArenaConfig:
+    """Create default runtime config for Claude vs Antigravity or Mock."""
+    base_dir = Path.cwd()
+    topic_str = topic or (
+        "Is the universe fundamentally a mathematical structure (Ontic Structural Realism), "
+        "or is phenomenal consciousness an irreducible ontological primitive?"
+    )
+
+    claude_persona_file = base_dir / "prompts" / "claude_alfa.txt"
+    agy_persona_file = base_dir / "prompts" / "agy_beta.txt"
+
+    type_claude = "mock" if mock else "claude"
+    type_agy = "mock" if mock else "agy"
+
+    agents = {
+        "claude": AgentConfig(
+            type=type_claude,
+            name="Claude Code",
+            role="Agente Alfa: Riduzionismo Analitico e Logica Epistemologica",
+            color="bright_magenta",
+            persona_file=str(claude_persona_file) if claude_persona_file.exists() else None,
+            persona_text=None if claude_persona_file.exists() else (
+                "You are Agent Alfa in a deep philosophical dispute on reality and mind. "
+                "Your stance: strict analytical reductionism, empirical physicalism, and formal logic. "
+                "Deconstruct vague metaphors and challenge unproven assertions."
+            ),
+        ),
+        "antigravity": AgentConfig(
+            type=type_agy,
+            name="Antigravity",
+            role="Agente Beta: Teoria dei Sistemi Complessi, Olismo ed Emergenza",
+            color="bright_cyan",
+            effort=effort,
+            persona_file=str(agy_persona_file) if agy_persona_file.exists() else None,
+            persona_text=None if agy_persona_file.exists() else (
+                "You are Agent Beta in a deep philosophical dispute on reality and mind. "
+                "Your stance: systems theory, phenomenological holism, and ontological emergence. "
+                "Challenge mechanistic reductionism using non-linear constraints and observer dynamics."
+            ),
+        ),
+    }
+
+    return ArenaConfig(
+        topic=topic_str,
+        rounds=rounds,
+        mode="ping_pong",
+        agents=agents,
+        agent_order=["claude", "antigravity"],
+        workspace=WorkspaceConfig(
+            dir_path=workspace_dir,
+            manifesto_filename="arena_manifesto.md",
+            memory_prefix="memory",
+            git_track=git_track,
+        ),
+    )
+
+
+@app.command()
+def run(
+    config_file: Optional[Path] = typer.Option(
+        None, "--config", "-c", help="Path to a YAML configuration file"
+    ),
+    topic: Optional[str] = typer.Option(
+        None, "--topic", "-t", help="Initial debate seed or philosophical proposition"
+    ),
+    rounds: int = typer.Option(
+        3, "--rounds", "-r", min=1, max=50, help="Number of debate cycles/rounds"
+    ),
+    mock: bool = typer.Option(
+        False, "--mock", help="Use simulated mock agents (no token costs, fast offline test)"
+    ),
+    effort: Optional[str] = typer.Option(
+        None, "--effort", help="Reasoning effort for Antigravity: low, medium, high"
+    ),
+    git: bool = typer.Option(
+        True, "--git/--no-git", help="Automatically commit round diffs to git"
+    ),
+    workspace: str = typer.Option(
+        "workspace", "--workspace", "-w", help="Workspace directory for shared files"
+    ),
+):
+    """Launch an autonomous debate session between CLI agents."""
+    if config_file and config_file.exists():
+        console.print(f"[dim]Loading configuration from {config_file}...[/dim]")
+        cfg = load_config(config_file)
+        if topic:
+            cfg.topic = topic
+        if rounds:
+            cfg.rounds = rounds
+        if mock:
+            for a in cfg.agents.values():
+                a.type = "mock"
+    else:
+        cfg = create_default_config(
+            topic=topic,
+            rounds=rounds,
+            mock=mock,
+            effort=effort,
+            git_track=git,
+            workspace_dir=workspace,
+        )
+
+    # Initialize event bus and console renderer
+    event_bus = EventBus()
+    reporter = RichConsoleReporter(console=console)
+    reporter.attach(event_bus)
+
+    # Initialize orchestrator and run
+    orchestrator = Orchestrator(config=cfg, event_bus=event_bus)
+    orchestrator.initialize()
+    orchestrator.run()
+
+
+@app.command()
+def verify():
+    """Verify health and installation status of CLI tools (agy, claude, git)."""
+    table = Table(title="CLI Environment & Tool Health Check", border_style="cyan")
+    table.add_column("Tool", style="bold white")
+    table.add_column("Status", style="bold")
+    table.add_column("Version", style="green")
+    table.add_column("Binary Path", style="dim")
+    table.add_column("Details / Notes", style="yellow")
+
+    # Check agy
+    dummy_agy_cfg = AgentConfig(type="agy", name="Antigravity")
+    agy_adapter = AgentRegistry.create("agy", dummy_agy_cfg, Path("."))
+    agy_health = agy_adapter.health_check()
+
+    table.add_row(
+        "Google Antigravity (agy)",
+        "[green]AVAILABLE[/green]" if agy_health.is_available else "[red]MISSING[/red]",
+        agy_health.version or "N/A",
+        agy_health.binary_path or "N/A",
+        agy_health.error_details or "Ready for headless execution (-p)",
+    )
+
+    # Check claude
+    dummy_claude_cfg = AgentConfig(type="claude", name="Claude Code")
+    claude_adapter = AgentRegistry.create("claude", dummy_claude_cfg, Path("."))
+    claude_health = claude_adapter.health_check()
+
+    table.add_row(
+        "Claude Code (claude)",
+        "[green]AVAILABLE[/green]" if claude_health.is_available else "[red]MISSING[/red]",
+        claude_health.version or "N/A",
+        claude_health.binary_path or "N/A",
+        claude_health.error_details or "Ready for headless execution (-p)",
+    )
+
+    # Check git
+    from agent_orchestrator.workspace.git_tracker import GitTracker
+    git_tracker = GitTracker(Path("."), enabled=True)
+    git_avail = git_tracker.is_available()
+
+    table.add_row(
+        "Git Version Control",
+        "[green]ACTIVE[/green]" if git_avail else "[yellow]NOT REPO[/yellow]",
+        "Installed" if git_tracker._git_bin else "Missing",
+        git_tracker._git_bin or "N/A",
+        "Repository active" if git_avail else "Directory is not inside a git repo",
+    )
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+@app.command()
+def history(
+    workspace_dir: Path = typer.Option(
+        Path("workspace"), "--workspace", "-w", help="Workspace path to inspect"
+    ),
+):
+    """Inspect previous debate rounds and saved snapshots."""
+    rounds_dir = workspace_dir / "rounds"
+    if not rounds_dir.exists():
+        console.print(f"[yellow]No rounds directory found at {rounds_dir}[/yellow]")
+        return
+
+    snapshots = sorted(list(rounds_dir.glob("*.json")))
+    if not snapshots:
+        console.print(f"[yellow]No turn snapshots found in {rounds_dir}[/yellow]")
+        return
+
+    table = Table(title=f"Debate History: {workspace_dir}", border_style="bright_blue")
+    table.add_column("File", style="cyan")
+    table.add_column("Size", style="white")
+
+    for s in snapshots:
+        table.add_row(s.name, f"{s.stat().st_size} bytes")
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+if __name__ == "__main__":
+    app()

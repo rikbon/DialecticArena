@@ -1,0 +1,33 @@
+# Philosophical Dialectic: Claude Code vs Google Antigravity
+topic: "Is the universe fundamentally a mathematical structure (Ontic Structural Realism), or does phenomenal consciousness represent an irreducible ontological primitive?"
+rounds: 3
+mode: "ping_pong"
+
+workspace:
+  dir_path: "workspace_philosophy"
+  manifesto_filename: "arena_manifesto.md"
+  memory_prefix: "memory"
+  git_track: true
+  autonomous_tools: false
+
+agents:
+  claude:
+    type: "claude"
+    name: "Claude Code (Alfa)"
+    role: "Pragmatismo Analitico, Riduzionismo e Fisica Computazionale"
+    color: "bright_magenta"
+    persona_file: "prompts/claude_alfa.txt"
+    timeout_seconds: 240
+
+  antigravity:
+    type: "agy"
+    name: "Antigravity (Beta)"
+    role: "Teoria dei Sistemi Complessi, Fenomenologia ed Emergenza Ontologica"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_beta.txt"
+    effort: "high"
+    timeout_seconds: 240
+
+agent_order:
+  - "claude"
+  - "antigravity"

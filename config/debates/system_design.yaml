@@ -1,0 +1,33 @@
+# System Design Arena: Claude (Sentinel/Security) vs Antigravity (Nexus/Architect)
+topic: "Design a self-healing, distributed agent mesh that processes 100k events/sec with zero state loss and Byzantine fault tolerance."
+rounds: 3
+mode: "ping_pong"
+
+workspace:
+  dir_path: "workspace_architecture"
+  manifesto_filename: "architecture_specification.md"
+  memory_prefix: "engineering_log"
+  git_track: true
+  autonomous_tools: false
+
+agents:
+  antigravity:
+    type: "agy"
+    name: "Nexus (Antigravity)"
+    role: "Distributed Systems & Event-Driven Architect"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_architect.txt"
+    effort: "high"
+    timeout_seconds: 240
+
+  claude:
+    type: "claude"
+    name: "Sentinel (Claude Code)"
+    role: "Fault Tolerance & Security Auditor"
+    color: "bright_magenta"
+    persona_file: "prompts/claude_critic.txt"
+    timeout_seconds: 240
+
+agent_order:
+  - "antigravity"
+  - "claude"

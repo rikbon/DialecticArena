@@ -1,0 +1,30 @@
+# Fast simulation demo configuration (Zero API tokens, offline)
+topic: "Can deterministic algorithmic computation produce non-illusory intentionality and subjective phenomenality?"
+rounds: 3
+mode: "ping_pong"
+
+workspace:
+  dir_path: "workspace_demo"
+  manifesto_filename: "arena_manifesto.md"
+  memory_prefix: "memory"
+  git_track: true
+  autonomous_tools: false
+
+agents:
+  claude:
+    type: "mock"
+    name: "Claude Code (Alfa)"
+    role: "Pragmatismo Analitico e Riduzionismo Computazionale"
+    color: "bright_magenta"
+    persona_file: "prompts/claude_alfa.txt"
+
+  antigravity:
+    type: "mock"
+    name: "Antigravity (Beta)"
+    role: "Olismo Sistemico e Fenomenologia Emergente"
+    color: "bright_cyan"
+    persona_file: "prompts/agy_beta.txt"
+
+agent_order:
+  - "claude"
+  - "antigravity"
