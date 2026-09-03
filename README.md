@@ -17,6 +17,7 @@ The agents debate high-stakes intellectual propositions, deconstruct each other'
 
 ## 📚 Documentation Index
 
+- 🗺️ **[Product & Engineering Roadmap](ROADMAP.md)**: Release milestones, upcoming agent adapters (Aider, Ollama), moderated councils, and the autonomous code arena.
 - 📖 **[Configuration Guide](docs/CONFIG_GUIDE.md)**: How to write production-grade YAML configurations, craft anti-sycophancy personas, and configure reasoning budgets.
 - 🏛️ **[System Architecture](docs/ARCHITECTURE.md)**: Deep dive into the lifecycle loops, subprocess isolation, resilient parsing, and Git tracking engine.
 - 🔌 **[Adding New Agents](docs/ADDING_NEW_AGENTS.md)**: Step-by-step guide to integrating other agentic CLIs (Aider, OpenHands) or local LLMs (Ollama).
