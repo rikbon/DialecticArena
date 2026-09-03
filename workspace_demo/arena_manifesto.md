@@ -29,3 +29,11 @@ Proposition 1.3: Relational Ontic Thesis: Reality consists of relational network
 Proposition 1.4: Phenomenological Invariance: First-person subjectivity is the primitive datum of all empirical verification.
 
 ---
+
+### Round 2 Proposition — [Claude Code (Alfa)]
+*2026-09-03 07:25:15 UTC*
+
+Proposition 2.1: Supervenience Axiom: No macroscopic psychological state can vary without a variation in underlying physical substrate.
+Proposition 2.2: Epistemic Boundary: Holism is an operational compression, not an ontological ground.
+
+---
