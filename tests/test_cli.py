@@ -48,3 +48,18 @@ def test_cli_run_rounds_alias(tmp_path):
     )
     assert result.exit_code == 0
     assert (ws_dir / "arena_manifesto.md").exists()
+
+
+def test_cli_help_general():
+    result = runner.invoke(app, ["help"])
+    assert result.exit_code == 0
+    assert "DIALECTIC ARENA" in result.stdout
+    assert "Available Commands" in result.stdout
+    assert "Common Execution Examples" in result.stdout
+
+
+def test_cli_help_subcommand():
+    result = runner.invoke(app, ["help", "run"])
+    assert result.exit_code == 0
+    assert "--config" in result.stdout
+    assert "--turns" in result.stdout

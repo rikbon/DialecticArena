@@ -8,6 +8,8 @@ from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
+from rich.panel import Panel
 
 from agent_orchestrator.adapters.base import AgentRegistry
 from agent_orchestrator.config import (
@@ -309,6 +311,102 @@ def history(
 
     console.print()
     console.print(table)
+    console.print()
+
+
+@app.command(name="help")
+def help_cmd(
+    ctx: typer.Context,
+    command: Optional[str] = typer.Argument(
+        None,
+        help="Specific command to inspect (e.g., 'run', 'verify', 'history')",
+    ),
+):
+    """Display comprehensive command usage, options, and quick-start examples."""
+    click_cmd = typer.main.get_command(app)
+
+    if command:
+        sub = click_cmd.get_command(ctx, command)
+        if sub:
+            console.print()
+            console.print(sub.get_help(ctx))
+            console.print()
+            return
+        else:
+            console.print(f"\n[bold red]Error:[/bold red] Unknown command '{command}'. Available commands: run, verify, history, help\n")
+            raise typer.Exit(code=1)
+
+    header_text = Text("DIALECTIC ARENA: MULTI-AGENT AUTONOMOUS ORCHESTRATOR", style="bold yellow")
+    overview = (
+        "[bold cyan]Overview:[/bold cyan]\n"
+        "An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents "
+        "(`claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and APIs) over a shared "
+        "living filesystem, automated Git timeline, and consensus convergence scoring.\n\n"
+        "[bold cyan]Usage:[/bold cyan]\n"
+        "  python run.py [COMMAND] [OPTIONS]\n"
+        "  python run.py help [COMMAND]"
+    )
+
+    cmd_table = Table(title="Available Commands", border_style="bright_blue", show_header=True)
+    cmd_table.add_column("Command", style="bold green", no_wrap=True)
+    cmd_table.add_column("Description", style="white")
+
+    cmd_table.add_row("run", "Launch an autonomous debate or collaboration session between agent adapters.")
+    cmd_table.add_row("verify", "Inspect environment health and availability of all 7 supported tools.")
+    cmd_table.add_row("history", "List and inspect stored turn snapshots and session artifacts.")
+    cmd_table.add_row("help", "Display this guide or detailed help for a specific command (e.g., 'help run').")
+
+    example_table = Table(title="Common Execution Examples", border_style="bright_green", show_header=True)
+    example_table.add_column("Action / Scenario", style="bold cyan", no_wrap=True)
+    example_table.add_column("Command Line", style="bright_yellow")
+
+    example_table.add_row(
+        "Offline dry run (zero tokens)",
+        "python run.py run --mock --turns 2",
+    )
+    example_table.add_row(
+        "Live dual-agent debate (high effort)",
+        "python run.py run --turns 3 --effort high",
+    )
+    example_table.add_row(
+        "Three-agent Moderated Council",
+        "python run.py run --config config/debates/moderated_council.yaml",
+    )
+    example_table.add_row(
+        "100% Offline Local Model (Ollama)",
+        "python run.py run --config config/debates/ollama_local.yaml",
+    )
+    example_table.add_row(
+        "Debate with Dynamic Persona Mutation",
+        "python run.py run --mock --turns 3 --mutate-personas",
+    )
+    example_table.add_row(
+        "Verify CLI tools and environment",
+        "python run.py verify",
+    )
+    example_table.add_row(
+        "Detailed help for 'run' options",
+        "python run.py help run",
+    )
+
+    doc_panel = Panel(
+        "[bold cyan]Documentation & Architecture References:[/bold cyan]\n"
+        "- README.md: Getting started, supported tools, and architecture diagram\n"
+        "- ROADMAP.md: Release milestones (v0.1.0, v0.2.0, v0.3.0 Released; v0.4.0 Planned)\n"
+        "- docs/CONFIG_GUIDE.md: YAML schema reference, persona crafting, and preset examples\n"
+        "- docs/ARCHITECTURE.md: Execution loop, subprocess isolation, and convergence engine\n"
+        "- docs/ADDING_NEW_AGENTS.md: Interface specifications for developing custom adapters",
+        border_style="dim white",
+    )
+
+    console.print()
+    console.print(Panel(overview, title=header_text, border_style="bright_blue", padding=(1, 2)))
+    console.print()
+    console.print(cmd_table)
+    console.print()
+    console.print(example_table)
+    console.print()
+    console.print(doc_panel)
     console.print()
 
 

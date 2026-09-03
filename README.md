@@ -10,7 +10,7 @@
 [![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex-blue.svg)]()
 [![Pi Agent](https://img.shields.io/badge/Pi%20Agent-Platform-purple.svg)]()
 [![Nous Hermes](https://img.shields.io/badge/Nous-Hermes-orange.svg)]()
-[![Tests Passing](https://img.shields.io/badge/Tests-24%20Passed-brightgreen.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-26%20Passed-brightgreen.svg)]()
 
 > **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and APIs) over a shared living filesystem, automated Git timeline, and consensus convergence scoring.**
 
@@ -205,6 +205,7 @@ python3 run.py run --config config/debates/system_design.yaml
 | `run` | `--convergence` | Analyze and score dialectic consensus convergence | `true` |
 | `verify` | *(none)* | Health check on local `agy`, `claude`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and `git` | — |
 | `history`| `--workspace`, `-w` | List stored turn snapshots in a workspace | `workspace` |
+| `help` | `[COMMAND]` | Display command usage, options, and quick-start examples | — |
 
 ---
 
