@@ -1,6 +1,6 @@
 # Dialectic Arena Default Configuration
 topic: "Is the universe fundamentally a mathematical structure (Ontic Structural Realism), or is phenomenal consciousness an irreducible ontological primitive?"
-rounds: 3
+turns: 3
 mode: "ping_pong"
 
 workspace:
@@ -14,7 +14,7 @@ agents:
   claude:
     type: "claude"
     name: "Claude Code"
-    role: "Agente Alfa: Riduzionismo Analitico e Logica Epistemologica"
+    role: "Agent Alfa: Analytical Reductionism & Formal Epistemology"
     color: "bright_magenta"
     persona_file: "prompts/claude_alfa.txt"
     timeout_seconds: 240
@@ -23,7 +23,7 @@ agents:
   antigravity:
     type: "agy"
     name: "Antigravity"
-    role: "Agente Beta: Teoria dei Sistemi Complessi, Olismo ed Emergenza"
+    role: "Agent Beta: Complex Systems Theory, Holism & Emergence"
     color: "bright_cyan"
     persona_file: "prompts/agy_beta.txt"
     effort: "high"

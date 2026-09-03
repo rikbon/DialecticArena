@@ -54,7 +54,7 @@ class RichConsoleReporter:
         content = (
             f"[bold cyan]Seed Topic:[/bold cyan]\n"
             f"[italic white]{topic}[/italic white]\n\n"
-            f"[bold green]Interactions (Turns):[/bold green] {total_turns} (Botte e Risposte)  |  "
+            f"[bold green]Interactions (Turns):[/bold green] {total_turns} (Exchanges)  |  "
             f"[bold green]Participants:[/bold green] {agent_badges}"
         )
 
@@ -65,13 +65,13 @@ class RichConsoleReporter:
     def _on_turn_start(self, event: ArenaEvent) -> None:
         t = event.turn_num
         total = event.payload.get("total_turns", 0)
-        self.console.print(Rule(f"[bold yellow]TURN {t} of {total} [Interazione: Botta e Risposta][/bold yellow]", style="yellow"))
+        self.console.print(Rule(f"[bold yellow]TURN {t} of {total} [Interaction: Thesis & Antithesis][/bold yellow]", style="yellow"))
         self.console.print()
 
     def _on_step_start(self, event: ArenaEvent) -> None:
         agent_name = event.agent_name or "Agent"
-        label = event.step_label or "Mossa"
-        self.console.print(f"[bold dim]>> [Turno {event.turn_num}.{event.step_num} | {label}] '{agent_name}' elabora la replica...[/bold dim]")
+        label = event.step_label or "Step"
+        self.console.print(f"[bold dim]>> [Turn {event.turn_num}.{event.step_num} | {label}] '{agent_name}' synthesizing response...[/bold dim]")
 
     def _on_step_complete(self, event: ArenaEvent) -> None:
         res: Optional[TurnResult] = event.payload.get("result")
@@ -134,7 +134,7 @@ class RichConsoleReporter:
         table.add_column("Metric", style="cyan", justify="right")
         table.add_column("Value", style="white")
 
-        table.add_row("Interactions (Turns - Botte e Risposte)", str(total_turns))
+        table.add_row("Interactions (Turns - Exchanges)", str(total_turns))
         table.add_row("Total Agent Responses Generated", str(total_steps))
         table.add_row("Shared Manifesto Document", manifesto_path)
         table.add_row("Status", "[bold green]Completed Successfully[/bold green]")

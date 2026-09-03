@@ -53,7 +53,7 @@ def create_default_config(
         "claude": AgentConfig(
             type=type_claude,
             name="Claude Code",
-            role="Agente Alfa: Riduzionismo Analitico e Logica Epistemologica",
+            role="Agent Alfa: Analytical Reductionism & Formal Epistemology",
             color="bright_magenta",
             persona_file=str(claude_persona_file) if claude_persona_file.exists() else None,
             persona_text=None if claude_persona_file.exists() else (
@@ -65,7 +65,7 @@ def create_default_config(
         "antigravity": AgentConfig(
             type=type_agy,
             name="Antigravity",
-            role="Agente Beta: Teoria dei Sistemi Complessi, Olismo ed Emergenza",
+            role="Agent Beta: Complex Systems Theory, Holism & Emergence",
             color="bright_cyan",
             effort=effort,
             persona_file=str(agy_persona_file) if agy_persona_file.exists() else None,
@@ -101,10 +101,10 @@ def run(
         None, "--topic", help="Initial debate seed or philosophical proposition"
     ),
     turns: int = typer.Option(
-        3, "--turns", "-t", min=1, max=50, help="Number of interactions ('botte e risposte')"
+        3, "--turns", "-t", min=1, max=50, help="Number of interaction cycles (exchanges)"
     ),
     rounds: Optional[int] = typer.Option(
-        None, "--rounds", "-r", help="Alias for --turns (botte e risposte)"
+        None, "--rounds", "-r", help="Alias for --turns"
     ),
     mock: bool = typer.Option(
         False, "--mock", help="Use simulated mock agents (no token costs, fast offline test)"
@@ -119,7 +119,7 @@ def run(
         "workspace", "--workspace", "-w", help="Workspace directory for shared files"
     ),
 ):
-    """Launch an autonomous debate session between CLI agents (each turn is a 'botta e risposta')."""
+    """Launch an autonomous debate session between CLI agents (each turn is a complete exchange)."""
     actual_turns = rounds if rounds is not None else turns
 
     if config_file and config_file.exists():

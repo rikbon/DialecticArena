@@ -11,9 +11,9 @@ from typing import Any, Optional
 class EventType(str, Enum):
     ARENA_START = "arena_start"
     ARENA_COMPLETE = "arena_complete"
-    TURN_START = "turn_start"          # Start of a complete Botta e Risposta interaction
-    TURN_COMPLETE = "turn_complete"    # End of a complete Botta e Risposta interaction
-    STEP_START = "step_start"          # Individual agent speaking (Botta or Risposta)
+    TURN_START = "turn_start"          # Start of a complete exchange interaction
+    TURN_COMPLETE = "turn_complete"    # End of a complete exchange interaction
+    STEP_START = "step_start"          # Individual agent speaking (Thesis, Antithesis, etc.)
     STEP_COMPLETE = "step_complete"    # Individual agent completed response
     ROUND_START = "turn_start"         # Compatibility alias
     ROUND_COMPLETE = "turn_complete"   # Compatibility alias
@@ -27,9 +27,9 @@ class EventType(str, Enum):
 class ArenaEvent:
     event_type: EventType
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    turn_num: int = 0                  # 1, 2, 3 (Interaction number)
-    step_num: int = 0                  # 1 (Botta), 2 (Risposta), etc.
-    step_label: str = ""               # "Botta", "Risposta", "Replica"
+    turn_num: int = 0                  # 1, 2, 3 (Interaction exchange number)
+    step_num: int = 0                  # 1 (Thesis), 2 (Antithesis), etc.
+    step_label: str = ""               # "Thesis", "Antithesis", "Rebuttal"
     round_num: int = 0                 # Alias for turn_num
     agent_id: Optional[str] = None
     agent_name: Optional[str] = None
@@ -46,10 +46,10 @@ class HealthCheckResult:
 
 @dataclass
 class TurnContext:
-    turn_num: int                      # Interaction index (1, 2, 3...)
-    step_num: int                      # 1 = Botta, 2 = Risposta
-    step_label: str                    # "Botta" or "Risposta"
-    total_turns: int                   # Total interactions planned
+    turn_num: int                      # Interaction exchange index (1, 2, 3...)
+    step_num: int                      # 1 = Thesis, 2 = Antithesis
+    step_label: str                    # "Thesis" or "Antithesis"
+    total_turns: int                   # Total interaction exchanges planned
     agent_id: str
     agent_name: str
     agent_role: str

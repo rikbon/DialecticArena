@@ -31,7 +31,7 @@ def test_mock_adapter_execution(tmp_path: Path):
     context = TurnContext(
         turn_num=1,
         step_num=1,
-        step_label="Botta",
+        step_label="Thesis",
         total_turns=3,
         agent_id="mock_alfa",
         agent_name="Mock Alfa",

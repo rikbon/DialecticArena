@@ -1,10 +1,10 @@
-# Philosophical Dialectic: Claude Code vs Google Antigravity
-topic: "Is the universe fundamentally a mathematical structure (Ontic Structural Realism), or does phenomenal consciousness represent an irreducible ontological primitive?"
+# AI Bubble vs General Purpose Technology Dialectic: Claude Code vs Google Antigravity
+topic: "Will generative AI prove to be an overleveraged speculative bubble, or is it an enduring general-purpose technology driving an irreversible paradigm shift for humanity?"
 turns: 3
 mode: "ping_pong"
 
 workspace:
-  dir_path: "workspace_philosophy"
+  dir_path: "workspace_ai_future"
   manifesto_filename: "arena_manifesto.md"
   memory_prefix: "memory"
   git_track: true
@@ -14,7 +14,7 @@ agents:
   claude:
     type: "claude"
     name: "Claude Code (Alfa)"
-    role: "Analytical Pragmatism, Reductionism & Computational Physics"
+    role: "Structural Economic Skepticism, Diminishing Returns & Financial Cycle Analysis"
     color: "bright_magenta"
     persona_file: "prompts/claude_alfa.txt"
     timeout_seconds: 240
@@ -22,7 +22,7 @@ agents:
   antigravity:
     type: "agy"
     name: "Antigravity (Beta)"
-    role: "Complex Systems Theory, Phenomenology & Ontological Emergence"
+    role: "Technological Accelerationism, General Purpose Technologies & Systemic Transformation"
     color: "bright_cyan"
     persona_file: "prompts/agy_beta.txt"
     effort: "high"

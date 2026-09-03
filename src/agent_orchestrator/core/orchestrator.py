@@ -98,8 +98,8 @@ class Orchestrator:
                 for step_idx, (agent_id, agent_cfg) in enumerate(ordered_agents, start=1):
                     adapter = self.adapters[agent_id]
                     step_label = (
-                        "Botta" if step_idx == 1
-                        else ("Risposta" if step_idx == 2 else f"Replica {step_idx}")
+                        "Thesis" if step_idx == 1
+                        else ("Antithesis" if step_idx == 2 else f"Rebuttal {step_idx}")
                     )
 
                     # Read current workspace state

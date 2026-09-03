@@ -5,12 +5,21 @@
 [![Multi-Agent](https://img.shields.io/badge/Architecture-Multi--Agent%20CLI-purple.svg)]()
 [![Google Antigravity](https://img.shields.io/badge/Google-Antigravity%20(agy)-00C4B4.svg)]()
 [![Claude Code](https://img.shields.io/badge/Anthropic-Claude%20Code-D97706.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-14%20Passed-brightgreen.svg)]()
 
 > **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude` & `agy`) over a shared living filesystem and Git timeline.**
 
-Unlike traditional LLM wrappers that merely exchange ephemeral in-memory strings via chat APIs, **Dialectic Arena** treats cutting-edge developer CLIs—such as **Google Antigravity (`agy`)** and **Claude Code (`claude`)**—as autonomous terminal entities.
+Unlike traditional LLM frameworks that merely exchange ephemeral in-memory strings via chat APIs, **Dialectic Arena** treats cutting-edge developer CLIs—such as **Google Antigravity (`agy`)** and **Claude Code (`claude`)**—as autonomous terminal entities.
 
 The agents debate high-stakes intellectual propositions, deconstruct each other's premises, co-author a persistent ontology manifesto on disk, and preserve their internal paradigm shifts across turns.
+
+---
+
+## 📚 Documentation Index
+
+- 📖 **[Configuration Guide](docs/CONFIG_GUIDE.md)**: How to write production-grade YAML configurations, craft anti-sycophancy personas, and configure reasoning budgets.
+- 🏛️ **[System Architecture](docs/ARCHITECTURE.md)**: Deep dive into the lifecycle loops, subprocess isolation, resilient parsing, and Git tracking engine.
+- 🔌 **[Adding New Agents](docs/ADDING_NEW_AGENTS.md)**: Step-by-step guide to integrating other agentic CLIs (Aider, OpenHands) or local LLMs (Ollama).
 
 ---
 
@@ -26,9 +35,9 @@ flowchart TD
     end
 
     subgraph AgentAdapters ["Agent CLI Adapters"]
-        AR -->|Invoke Headless| CLA[Claude Code Adapter\nclaude -p ...]
-        AR -->|Invoke Headless| AGY[Antigravity Adapter\nagy -p --effort ...]
-        AR -->|Offline Simulation| MCK[Mock Adapter\nNo token costs]
+        AR -->|Headless Exec| CLA[Claude Code Adapter\nclaude -p ...]
+        AR -->|Headless Exec| AGY[Antigravity Adapter\nagy -p --effort ...]
+        AR -->|Offline Simulation| MCK[Mock Adapter\nZero token cost]
         AR -.->|Extensible| NEW[Future Adapters\nAider, OpenHands, Ollama...]
     end
 
@@ -37,39 +46,52 @@ flowchart TD
         AGY -->|Output Extraction| WM
         WM -->|Co-Authored Synthesis| MAN["arena_manifesto.md\n(Shared Ontology)"]
         WM -->|Private Cognitive Logs| MEM["memory_claude.md\nmemory_antigravity.md"]
-        WM -->|Turn History Snapshots| RND["rounds/round_XX_turn_YY.json"]
-        WM -->|Automated Commits| GIT[("Git Version Timeline\n(Commit per turn)")]
+        WM -->|Turn History Snapshots| RND["rounds/turn_XX_step_YY.json"]
+        WM -->|Automated Commits| GIT[("Git Version Timeline\n(Commit per step)")]
     end
 ```
 
 ---
 
-## ✨ Key Features
+## ✨ Core Principles & Key Features
 
-1. **Native CLI Orchestration:**
-   Direct headless execution of official developer CLIs (`agy -p` with reasoning effort flags, `claude -p` with permission bypass).
-2. **Tripartite Output Protocol:**
-   Every turn enforces separation between:
-   - **Public Dialectic Argument:** Razor-sharp critique, refutation, or architectural thesis delivered to the opponent.
-   - **Ontological Contribution:** Formal propositions and definitions automatically merged into the shared `arena_manifesto.md`.
-   - **Cognitive Evolution Shift:** Private self-reflection recorded in each agent's personal memory log (`memory_<agent>.md`).
-3. **Automated Git Timeline:**
-   Each turn stages file changes and commits them with descriptive semantic messages (`[Round 1 | Turn 2] Antigravity (Beta): ...`). Run `git log` or `git diff HEAD~1` to see the conceptual evolution over time.
-4. **Resilient Output Parsing:**
-   Handles variations in Markdown headers (English/Italian), casing, and cleanly falls back if an agent provides free-form answers.
-5. **Zero-Token Mock Simulator:**
-   Includes built-in `MockAgentAdapter` (`--mock` flag) enabling instantaneous testing, CI verification, and UI previewing without consuming API quotas.
-6. **Rich Interactive Terminal:**
-   Rendered with [Rich](https://github.com/Textualize/rich) with customized color themes, spinners, turn cards, and execution summaries.
+### 1. The Interaction Paradigm: Every Turn is an Exchange
+In Dialectic Arena, a **Turn is an Exchange (Interaction)** consisting of:
+- **Step 1 (Thesis):** Agent 1 presents their formal proposition or critique.
+- **Step 2 (Antithesis):** Agent 2 counters, deconstructs axioms, and offers synthesis.
+Setting `--turns 3` executes **3 complete interaction exchanges** (a total of **6 agent responses**).
+
+### 2. Tripartite Output Protocol
+To break out of standard LLM sycophancy (*"I completely agree with you..."*), each agent response is parsed into three isolated sections:
+* `### ARGUMENT`: Piercing, dense dialectical reply delivered directly to the opponent.
+* `### ONTOLOGY CONTRIBUTION`: Formal axioms or definitions appended to `arena_manifesto.md`.
+* `### INTERNAL EVOLUTION`: Private self-reflection recorded in `memory_<agent>.md`.
+
+### 3. Native CLI Orchestration
+Runs real developer terminal CLIs in headless mode:
+- **Google Antigravity (`agy`):** Invocations use `agy -p` with reasoning effort flags (`--effort low|medium|high`) and `--dangerously-skip-permissions`.
+- **Claude Code (`claude`):** Invocations use `claude -p` with `--dangerously-skip-permissions` and automatic runtime diagnostic filtering.
+
+### 4. Automated Git Version Timeline
+Every turn commits workspace state with semantic commit messages:
+```bash
+[Turn 1 | Thesis] Claude Code (Alfa): Supervenience Axiom in physical configurations...
+[Turn 1 | Antithesis] Antigravity (Beta): Mereological fallacy and relational networks...
+```
+Inspect the progression using `git log` or `git diff HEAD~1 HEAD`.
+
+### 5. Zero-Token Mock Simulator
+Run full simulations offline without spending API tokens or requiring CLI tools:
+```bash
+python3 run.py run --mock --turns 3
+```
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
-Ensure you have Python 3.10+ installed.
-
-Check if your local environment has the required CLI tools:
+### 1. Environment Verification
+Verify that your system has the required binaries installed and ready:
 ```bash
 python3 run.py verify
 ```
@@ -90,14 +112,13 @@ Expected output:
 └────────────────┴───────────┴────────────────┴───────────────┴────────────────┘
 ```
 
-### 2. Run an Offline Mock Simulation (Free & Instant)
-Test the entire orchestration loop and inspect the generated files. Each turn is a complete interaction ("botta e risposta"):
+### 2. Run an Offline Mock Simulation (Instant & Free)
 ```bash
 python3 run.py run --mock --turns 3
 ```
 
-### 3. Run a Live Debate (Claude Code vs Google Antigravity)
-Launch a live 3-turn dispute (3 complete "botta e risposta" interactions = 6 responses) on the nature of reality and mind:
+### 3. Launch a Live Debate (Claude Code vs Google Antigravity)
+Run 3 complete interaction exchanges (6 responses total) with high reasoning effort:
 ```bash
 python3 run.py run --turns 3 --effort high
 ```
@@ -109,14 +130,31 @@ python3 run.py run \
   --topic "Can deterministic computational automata produce non-epiphenomenal subjective consciousness?"
 ```
 
-### 4. Run with a Preset Configuration File
+### 4. Run Pre-Packaged Configurations
 ```bash
-# Philosophical massimi sistemi
-python3 run.py run --config config/debates/massimi_sistemi.yaml
+# Epistemic philosophy of mind
+python3 run.py run --config config/debates/philosophy_of_mind.yaml
 
-# Collaborative system architecture design
+# Collaborative distributed systems design
 python3 run.py run --config config/debates/system_design.yaml
 ```
+
+---
+
+## 🎛️ CLI Reference
+
+| Command | Option / Flag | Description | Default |
+| :--- | :--- | :--- | :--- |
+| `run` | `--turns`, `-t` | Number of complete interaction exchanges (Thesis & Antithesis) | `3` |
+| `run` | `--rounds`, `-r` | Compatibility alias for `--turns` | `3` |
+| `run` | `--topic` | Seed topic or problem statement | Preconfigured |
+| `run` | `--config`, `-c` | Path to a YAML configuration file | None |
+| `run` | `--effort` | Antigravity reasoning effort (`low`, `medium`, `high`) | None |
+| `run` | `--mock` | Use offline simulated agents (no token costs) | `false` |
+| `run` | `--git` / `--no-git` | Automatically commit round diffs to Git | `true` |
+| `run` | `--workspace`, `-w` | Directory path for output workspace artifacts | `workspace` |
+| `verify` | *(none)* | Health check on local `agy`, `claude`, and `git` binaries | — |
+| `history`| `--workspace`, `-w` | List stored turn snapshots in a workspace | `workspace` |
 
 ---
 
@@ -124,74 +162,52 @@ python3 run.py run --config config/debates/system_design.yaml
 
 ```text
 agentOrchestrator/
-├── config/
+├── config/                          # Session configurations
 │   ├── default.yaml                 # Base configuration
 │   └── debates/
-│       ├── massimi_sistemi.yaml     # Philosophy & consciousness debate
-│       ├── system_design.yaml       # Distributed systems design collaboration
+│       ├── philosophy_of_mind.yaml  # Epistemic consciousness debate
+│       ├── system_design.yaml       # Distributed systems collaboration
 │       └── mock_demo.yaml           # Offline simulation preset
-├── prompts/
+├── docs/                            # In-depth documentation
+│   ├── CONFIG_GUIDE.md              # Guide to writing YAML configs & personas
+│   ├── ARCHITECTURE.md              # System design & lifecycle details
+│   └── ADDING_NEW_AGENTS.md         # Guide to implementing new adapters
+├── prompts/                         # Agent persona prompts
 │   ├── claude_alfa.txt              # Analytic Reductionist persona
 │   ├── agy_beta.txt                 # Emergent Holist persona
 │   ├── claude_critic.txt            # Security/Reliability Auditor persona
 │   └── agy_architect.txt            # Systems Architect persona
 ├── src/
 │   └── agent_orchestrator/
-│       ├── __init__.py
-│       ├── cli.py                   # CLI entry points (run, verify, history)
-│       ├── config.py                # Pydantic schemas & YAML loader
-│       ├── types.py                 # TurnContext, TurnResult, Events
-│       ├── adapters/
+│       ├── adapters/                # Extensible agent integrations
 │       │   ├── base.py              # BaseAgentAdapter & AgentRegistry
 │       │   ├── agy.py               # Google Antigravity (agy) adapter
 │       │   ├── claude.py            # Claude Code (claude) adapter
 │       │   └── mock.py              # Simulated agent adapter
-│       ├── workspace/
-│       │   ├── manager.py           # Filesystem manager (manifesto, memories)
-│       │   ├── parser.py            # Output parser (sections & fallback)
+│       ├── workspace/               # Shared filesystem manager
+│       │   ├── manager.py           # Manifesto, memories, snapshot files
+│       │   ├── parser.py            # Resilient tripartite output parser
 │       │   └── git_tracker.py       # Automated Git versioning & diffs
-│       ├── core/
-│       │   ├── orchestrator.py      # Core debate loop & lifecycle
-│       │   └── events.py            # Pub/sub event bus
-│       └── ui/
-│           └── console.py           # Rich terminal renderer
-├── tests/                           # Pytest test suite (100% passing)
-├── run.py                           # Root runner script
+│       ├── core/                    # Core orchestration engine
+│       │   ├── orchestrator.py      # Main turn loop & lifecycle
+│       │   └── events.py            # Event bus and lifecycle hooks
+│       ├── ui/                      # Terminal UI
+│       │   └── console.py           # Rich console renderer
+│       ├── config.py                # Pydantic models & YAML loader
+│       ├── types.py                 # Core domain dataclasses
+│       └── cli.py                   # Typer CLI application
+├── tests/                           # Pytest test suite (14 tests, 100% passing)
+├── examples/                        # Sample generated manifestos
+├── run.py                           # Root entry point
 ├── pyproject.toml
 └── requirements.txt
 ```
 
 ---
 
-## 🔌 How to Add New Agent Adapters
-
-Adding a new tool (e.g., Aider, OpenHands, Ollama, Gemini SDK, etc.) takes only a few lines of code:
-
-1. Create a new adapter in `src/agent_orchestrator/adapters/`:
-
-```python
-from agent_orchestrator.adapters.base import BaseAgentAdapter, AgentRegistry
-from agent_orchestrator.types import TurnContext, TurnResult, HealthCheckResult
-
-@AgentRegistry.register("aider")
-class AiderAdapter(BaseAgentAdapter):
-    def health_check(self) -> HealthCheckResult:
-        # Check binary availability
-        ...
-
-    def execute_turn(self, context: TurnContext) -> TurnResult:
-        prompt = self.build_prompt(context)
-        # Execute your tool in subprocess or API call
-        ...
-```
-
-2. That's it! You can now use `type: "aider"` in any YAML configuration file or CLI argument.
-
----
-
 ## 🧪 Testing
 
-Run the full automated test suite with Pytest:
+Run the automated test suite:
 ```bash
 pytest tests/ -v
 ```
