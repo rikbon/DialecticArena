@@ -215,6 +215,45 @@ def verify():
         aider_health.error_details or "Ready for pair-programming turns",
     )
 
+    # Check codex
+    dummy_codex_cfg = AgentConfig(type="codex", name="Codex")
+    codex_adapter = AgentRegistry.create("codex", dummy_codex_cfg, Path("."))
+    codex_health = codex_adapter.health_check()
+
+    table.add_row(
+        "OpenAI Codex (codex)",
+        "[green]AVAILABLE[/green]" if codex_health.is_available else "[dim]NOT CONFIGURED[/dim]",
+        codex_health.version or "N/A",
+        codex_health.binary_path or "N/A",
+        codex_health.error_details or "Ready for code generation turns",
+    )
+
+    # Check piagent
+    dummy_pi_cfg = AgentConfig(type="piagent", name="PiAgent")
+    pi_adapter = AgentRegistry.create("piagent", dummy_pi_cfg, Path("."))
+    pi_health = pi_adapter.health_check()
+
+    table.add_row(
+        "Pi Agent (piagent)",
+        "[green]AVAILABLE[/green]" if pi_health.is_available else "[dim]NOT INSTALLED[/dim]",
+        pi_health.version or "N/A",
+        pi_health.binary_path or "N/A",
+        pi_health.error_details or "Install via: npm install -g @piagent/platform",
+    )
+
+    # Check hermes
+    dummy_hermes_cfg = AgentConfig(type="hermes", name="Hermes Agent")
+    hermes_adapter = AgentRegistry.create("hermes", dummy_hermes_cfg, Path("."))
+    hermes_health = hermes_adapter.health_check()
+
+    table.add_row(
+        "Nous Hermes (hermes)",
+        "[green]AVAILABLE[/green]" if hermes_health.is_available else "[dim]NOT INSTALLED[/dim]",
+        hermes_health.version or "N/A",
+        hermes_health.binary_path or "N/A",
+        hermes_health.error_details or "Install Hermes CLI or pull model via Ollama",
+    )
+
     # Check git
     from agent_orchestrator.workspace.git_tracker import GitTracker
     git_tracker = GitTracker(Path("."), enabled=True)

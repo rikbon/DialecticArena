@@ -60,7 +60,7 @@ workspace:
   autonomous_tools: false              # Allow agents to modify files directly via their tools
 
 # Agent Definitions
-# Supported types: 'claude', 'agy', 'ollama', 'aider', 'api', 'mock'
+# Supported types: 'claude', 'agy', 'ollama', 'aider', 'codex', 'piagent', 'hermes', 'api', 'mock'
 agents:
   claude:
     type: "claude"                     # Claude Code CLI
@@ -97,6 +97,26 @@ agents:
     role: "Pair Programming Implementer"
     color: "bright_yellow"
     model: "gpt-4o"
+
+  codex_agent:
+    type: "codex"                      # OpenAI Codex CLI / API code generator
+    name: "Codex Engine"
+    role: "Code Synthesizer & Implementer"
+    color: "bright_blue"
+    model: "gpt-4o"
+
+  pi_harness:
+    type: "piagent"                    # Pi Agent minimalist terminal harness
+    name: "Pi Agent"
+    role: "Autonomous Terminal Operator"
+    color: "bright_magenta"
+
+  hermes_agent:
+    type: "hermes"                     # Nous Research Hermes Agent CLI / Ollama
+    name: "Hermes Agent"
+    role: "Autonomous Self-Improving Reasoner"
+    color: "bright_red"
+    model: "hermes3:8b"
 
   cloud_inference:
     type: "api"                        # Direct cloud inference via LiteLLM / OpenAI

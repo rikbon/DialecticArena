@@ -7,9 +7,12 @@
 [![Claude Code](https://img.shields.io/badge/Anthropic-Claude%20Code-D97706.svg)]()
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20Models-white.svg)]()
 [![Aider](https://img.shields.io/badge/Aider-CLI%20Agent-blueviolet.svg)]()
-[![Tests Passing](https://img.shields.io/badge/Tests-18%20Passed-brightgreen.svg)]()
+[![OpenAI Codex](https://img.shields.io/badge/OpenAI-Codex-blue.svg)]()
+[![Pi Agent](https://img.shields.io/badge/Pi%20Agent-Platform-purple.svg)]()
+[![Nous Hermes](https://img.shields.io/badge/Nous-Hermes-orange.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-21%20Passed-brightgreen.svg)]()
 
-> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, and API models) over a shared living filesystem and automated Git timeline.**
+> **An autonomous multi-agent debate and collaboration engine orchestrating terminal coding agents (`claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and APIs) over a shared living filesystem and automated Git timeline.**
 
 Unlike conventional LLM wrappers that merely exchange ephemeral in-memory strings via chat endpoints, **Dialectic Arena** treats developer CLIs and local execution runtimes as first-class autonomous processes.
 
@@ -38,18 +41,24 @@ flowchart TD
     end
 
     subgraph AgentAdapters ["Supported Agent Adapters"]
-        AR -->|Headless CLI| CLA[Claude Code Adapter\nclaude -p ...]
-        AR -->|Headless CLI| AGY[Antigravity Adapter\nagy -p --effort ...]
-        AR -->|Local Open Weights| OLL[Ollama Adapter\nhttp://localhost:11434]
+        AR -->|Headless CLI| CLA[Claude Code\nclaude -p ...]
+        AR -->|Headless CLI| AGY[Antigravity\nagy -p --effort ...]
+        AR -->|Local Daemon| OLL[Ollama Adapter\nhttp://localhost:11434]
         AR -->|Headless Pair CLI| AID[Aider Adapter\naider --message ...]
-        AR -->|Direct Inference| API[Direct API Adapter\nLiteLLM / OpenAI SDK]
-        AR -->|Offline Simulation| MCK[Mock Adapter\nZero token cost]
+        AR -->|CLI / API| CDX[OpenAI Codex\ncodex exec / API]
+        AR -->|Terminal Harness| PIA[Pi Agent\npiagent run ...]
+        AR -->|Autonomous CLI| HER[Nous Hermes\nhermes run / Ollama]
+        AR -->|Direct Cloud| API[Direct API Adapter\nLiteLLM / OpenAI SDK]
+        AR -->|Offline Simulator| MCK[Mock Adapter\nZero token cost]
     end
 
     subgraph SharedWorkspace ["Shared Living Filesystem (workspace/)"]
         CLA -->|Output Extraction| WM
         AGY -->|Output Extraction| WM
         OLL -->|Output Extraction| WM
+        CDX -->|Output Extraction| WM
+        PIA -->|Output Extraction| WM
+        HER -->|Output Extraction| WM
         WM -->|Co-Authored Synthesis| MAN["arena_manifesto.md\n(Shared Ontology)"]
         WM -->|Private Cognitive Logs| MEM["memory_<agent>.md\n(Isolated Paradigm Shifts)"]
         WM -->|Turn History Snapshots| RND["rounds/turn_XX_step_YY.json"]
@@ -79,6 +88,9 @@ Executes developer CLIs and local services in headless mode:
 - **Claude Code (`claude`):** Invoked via `claude -p` with `--dangerously-skip-permissions` and diagnostic log filtering.
 - **Ollama Local (`ollama`):** Direct HTTP API integration for 100% private, offline inference with open-weight models (`gemma4`, `deepseek-r1`, `llama3.3`).
 - **Aider CLI (`aider`):** Headless pair-programming integration (`--message`, `--no-auto-commits`, `--yes-always`).
+- **OpenAI Codex (`codex`):** Execution via `codex` CLI or direct API fallback with code-specialized models.
+- **Pi Agent (`piagent`):** Lightweight terminal autonomous coding harness integration (`piagent run --headless`).
+- **Nous Hermes (`hermes`):** Nous Research Hermes Agent CLI integration and local/cloud Hermes model endpoints.
 
 ### 4. The Moderated Council (`mode: "moderated"`)
 Supports three-agent dialectic governance:
@@ -117,20 +129,18 @@ python3 run.py verify
 Sample output:
 ```
                       CLI Environment & Tool Health Check                       
-+---------------+---------------+---------------+---------------+--------------+
-| Tool          | Status        | Version       | Binary Path   | Notes        |
-+---------------+---------------+---------------+---------------+--------------+
-| Google        | AVAILABLE     | 1.1.25        | /usr/local/.. | Ready for    |
-| Antigravity   |               |               |               | headless -p  |
-| Claude Code   | AVAILABLE     | 2.1.258       | /usr/local/.. | Ready for    |
-| (claude)      |               | (Claude Code) |               | headless -p  |
-| Ollama Local  | AVAILABLE     | Ollama API    | /usr/local/.. | Ready for    |
-| (ollama)      |               | (Local models)|               | offline runs |
-| Aider CLI     | NOT INSTALLED | N/A           | N/A           | Install via  |
-| (aider)       |               |               |               | pip install  |
-| Git Version   | ACTIVE        | Installed     | /usr/bin/git  | Repository   |
-| Control       |               |               |               | active       |
-+---------------+---------------+---------------+---------------+--------------+
++-----------------------+---------------+---------------+---------------+
+| Tool                  | Status        | Version       | Notes         |
++-----------------------+---------------+---------------+---------------+
+| Google Antigravity    | AVAILABLE     | 1.1.25        | Headless -p   |
+| Claude Code           | AVAILABLE     | 2.1.258       | Headless -p   |
+| Ollama Local          | AVAILABLE     | Ollama API    | Offline runs  |
+| Aider CLI             | NOT INSTALLED | N/A           | pip install   |
+| OpenAI Codex          | AVAILABLE     | API / CLI     | Configured    |
+| Pi Agent              | NOT INSTALLED | N/A           | npm install   |
+| Nous Hermes           | AVAILABLE     | Hermes Agent  | Ready         |
+| Git Version Control   | ACTIVE        | Installed     | Repo active   |
++-----------------------+---------------+---------------+---------------+
 ```
 
 ### 2. Run an Offline Mock Simulation

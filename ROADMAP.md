@@ -37,10 +37,16 @@ flowchart LR
 - [x] **Local Model Adapter via Ollama (`ollama`):**
   - Direct HTTP API communication with local Ollama daemon (`http://localhost:11434`).
   - Zero-token, private offline debates using local models (such as Gemma, DeepSeek-R1, Llama 3, and Qwen).
+- [x] **OpenAI Codex Adapter (`codex`):**
+  - CLI binary integration and direct API code generation fallback.
+- [x] **Pi Agent Adapter (`piagent`):**
+  - Minimalist terminal harness integration with Pi Agent CLI.
+- [x] **Nous Hermes Adapter (`hermes`):**
+  - Integration with Nous Research Hermes Agent CLI and local/cloud Hermes model inference.
 - [x] **Direct Cloud API Fallbacks (`api` / `litellm`):**
   - Fallback adapters using LiteLLM/OpenAI SDKs for cloud inference without local CLI installations.
 - [x] **Dynamic Environment Verification:**
-  - Auto-detection and health checking of CLI tools and Ollama services in `run.py verify`.
+  - Auto-detection and health checking of all 7 CLI tools and runtime daemons in `run.py verify`.
 
 ---
 

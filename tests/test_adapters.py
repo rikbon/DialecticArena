@@ -92,3 +92,27 @@ def test_api_adapter_registration(tmp_path: Path):
     adapter = AgentRegistry.create("api_agent", cfg, tmp_path)
     health = adapter.health_check()
     assert isinstance(health.is_available, bool)
+
+
+def test_codex_adapter_registration(tmp_path: Path):
+    assert "codex" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="codex", name="Codex Agent")
+    adapter = AgentRegistry.create("codex_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)
+
+
+def test_piagent_adapter_registration(tmp_path: Path):
+    assert "piagent" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="piagent", name="Pi Agent")
+    adapter = AgentRegistry.create("pi_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)
+
+
+def test_hermes_adapter_registration(tmp_path: Path):
+    assert "hermes" in AgentRegistry.get_registered_types()
+    cfg = AgentConfig(type="hermes", name="Hermes Agent")
+    adapter = AgentRegistry.create("hermes_agent", cfg, tmp_path)
+    health = adapter.health_check()
+    assert isinstance(health.is_available, bool)

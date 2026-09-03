@@ -27,7 +27,7 @@ New adapters register themselves using the `@AgentRegistry.register("type_name")
 ---
 
 > [!NOTE]
-> **Built-in Adapters:** As of v0.2.0, adapters for `claude`, `agy`, `ollama`, `aider`, and `api` (LiteLLM) are already included out of the box in `src/agent_orchestrator/adapters/`. Use the implementation blueprints below to inspect how they work or to create custom adapters (e.g. OpenHands, Devin-style CLIs, or internal inference servers).
+> **Built-in Adapters:** As of v0.2.0, adapters for `claude`, `agy`, `ollama`, `aider`, `codex`, `piagent`, `hermes`, and `api` (LiteLLM) are already included out of the box in `src/agent_orchestrator/adapters/`. Use the implementation blueprints below to inspect how they work or to create custom adapters (e.g. OpenHands, Devin-style CLIs, or internal inference servers).
 
 ## 2. Example 1: Creating an Aider CLI Adapter
 

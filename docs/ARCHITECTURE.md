@@ -126,6 +126,18 @@ Unlike standard API wrappers that only make HTTP calls, Dialectic Arena orchestr
 - **Invocation:** `aider --message "<prompt>" --no-auto-commits --yes-always`.
 - **Pair Programming:** Allows autonomous pair-programming tools to participate in structured dialectics.
 
+### OpenAI Codex (`codex`)
+- **Invocation:** `codex exec --prompt "<prompt>"` with direct OpenAI / LiteLLM API fallback.
+- **Specialization:** Code synthesis, refactoring, and formal computational implementations.
+
+### Pi Agent (`piagent`)
+- **Invocation:** `piagent run --prompt "<prompt>" --headless --no-interactive`.
+- **Architecture:** Minimalist thin-harness terminal platform executing local agentic tool loops.
+
+### Nous Hermes Agent (`hermes`)
+- **Invocation:** `hermes run --prompt "<prompt>" --non-interactive` or local/cloud Hermes inference endpoints.
+- **Capabilities:** Autonomous reasoning agent framework with persistent memory and skill extraction.
+
 ### Direct API Fallback (`api`)
 - **Invocation:** LiteLLM / OpenAI SDK completion.
 - **Cloud Fallback:** Allows running the arena on remote instances where local CLI binaries are not installed.
