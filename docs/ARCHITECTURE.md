@@ -201,3 +201,13 @@ When `mutate_personas: true` is enabled:
 1. **Workspace Sandboxing:** Initial personas are seeded to `workspace/personas/<agent_id>.txt` from config or prompt templates.
 2. **Turn-by-Turn Adaptation:** When an agent produces an `### INTERNAL EVOLUTION` reflection containing paradigm shifts, concessions, or refined definitions, the orchestrator appends these cognitive shifts directly to the agent's dynamic persona file on disk.
 3. **In-Memory Adapter Reload:** The in-memory adapter instance reloads the evolved identity via `adapter.update_persona()`, ensuring that subsequent turn prompts operate from the agent's evolved philosophical stance rather than a static starting prompt.
+
+---
+
+## 8. Command-Line Interface Layer
+
+The CLI entry points (`run.py` -> `src/agent_orchestrator/cli.py`) provide user-facing commands:
+- **`run`:** Configures and launches autonomous debate sessions. Supports all CLI overrides (`--turns`, `--topic`, `--effort`, `--mock`, `--mutate-personas`, `--convergence`, `--workspace`, `--git/--no-git`).
+- **`verify`:** Probes environment availability, CLI versions, and daemon connectivity for all 7 supported adapter types and Git.
+- **`history`:** Lists, inspects, and audits previous debate rounds and saved snapshot JSON files.
+- **`help`:** Interactive CLI guide and subcommand introspection engine (`python run.py help` or `python run.py help <command>`).

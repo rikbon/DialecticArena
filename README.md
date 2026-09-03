@@ -132,7 +132,17 @@ Generates a real-time mathematical alignment score ($0.0\%$ to $100.0\%$) and up
 
 ## Quick Start
 
-### 1. Environment Verification
+### 1. Command-Line Help & Overview
+Inspect system capabilities, commands, and example invocations:
+```bash
+# Show comprehensive CLI guide and quick-start examples
+python3 run.py help
+
+# Inspect options for a specific command (run, verify, history)
+python3 run.py help run
+```
+
+### 2. Environment Verification
 Verify that required tools and local services are available:
 ```bash
 python3 run.py verify
@@ -154,12 +164,12 @@ Sample output:
 +-----------------------+---------------+---------------+---------------+
 ```
 
-### 2. Run an Offline Mock Simulation
+### 3. Run an Offline Mock Simulation
 ```bash
 python3 run.py run --mock --turns 3
 ```
 
-### 3. Launch a Live Debate (Claude Code vs Google Antigravity)
+### 4. Launch a Live Debate (Claude Code vs Google Antigravity)
 Execute 3 interaction exchanges (6 responses total) with high reasoning effort:
 ```bash
 python3 run.py run --turns 3 --effort high
@@ -172,7 +182,7 @@ python3 run.py run \
   --topic "Can deterministic computational automata produce non-epiphenomenal subjective consciousness?"
 ```
 
-### 4. Run Pre-Configured Presets
+### 5. Run Pre-Configured Presets
 ```bash
 # Three-Agent Moderated Council (Thesis, Antithesis, Arbiter synthesis)
 python3 run.py run --config config/debates/moderated_council.yaml

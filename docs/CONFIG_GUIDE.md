@@ -369,6 +369,9 @@ agent_order:
 When launching a session, CLI flags always take precedence over YAML values:
 
 ```bash
+# Inspect all command options and default parameters:
+python3 run.py help run
+
 # Override turns and topic on the fly:
 python3 run.py run \
   --config config/debates/philosophy_of_mind.yaml \
@@ -377,4 +380,7 @@ python3 run.py run \
 
 # Switch to zero-token offline mock simulation instantly:
 python3 run.py run --config config/debates/philosophy_of_mind.yaml --mock
+
+# Enable dynamic persona mutation from CLI:
+python3 run.py run --config config/debates/philosophy_of_mind.yaml --mutate-personas
 ```
